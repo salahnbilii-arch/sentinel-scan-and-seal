@@ -63,8 +63,8 @@ export function DeepAnalysisPanel() {
         </button>
         {result && !result.nothingToDo ? (
           <span className="font-mono text-[11px] text-muted-foreground">
-            {result.model} · {result.latencyMs} ms ·{" "}
-            {result.usage.completionTokens ?? "?"} out tokens
+            {result.model} · {result.latencyMs} ms · {result.usage.completionTokens ?? "?"} out
+            tokens
           </span>
         ) : null}
       </div>

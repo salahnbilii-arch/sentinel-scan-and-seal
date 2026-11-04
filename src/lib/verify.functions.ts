@@ -1,7 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { checkSignature, parseArtifact, runVerification, type SignedArtifact } from "./verify.server";
+import {
+  checkSignature,
+  parseArtifact,
+  runVerification,
+  type SignedArtifact,
+} from "./verify.server";
 
 const VerifyInput = z.object({
   source: z.string().min(1, "Provide the artefact to verify").max(120_000),
@@ -13,5 +18,7 @@ export const formalVerify = createServerFn({ method: "POST" })
   .handler(async ({ data }) => runVerification(data.source, data.artifactName ?? "artifact.txt"));
 
 export const recheckSignature = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => z.object({ artifact: z.record(z.string(), z.unknown()) }).parse(input))
+  .inputValidator((input: unknown) =>
+    z.object({ artifact: z.record(z.string(), z.unknown()) }).parse(input),
+  )
   .handler(async ({ data }) => checkSignature(parseArtifact(data.artifact)));

@@ -20,9 +20,14 @@ export class HttpError extends Error {
 /** Read a required string field and enforce its length bounds. */
 export function requireText(body: unknown, field: string, min: number, max: number): string {
   const value = (body as Record<string, unknown> | null)?.[field];
-  if (typeof value !== "string") throw new HttpError(400, "invalid_input", `"${field}" must be a string.`);
+  if (typeof value !== "string")
+    throw new HttpError(400, "invalid_input", `"${field}" must be a string.`);
   if (value.trim().length < min) {
-    throw new HttpError(400, "invalid_input", `"${field}" must contain at least ${min} character(s).`);
+    throw new HttpError(
+      400,
+      "invalid_input",
+      `"${field}" must contain at least ${min} character(s).`,
+    );
   }
   if (value.length > max) {
     throw new HttpError(413, "input_too_large", `"${field}" exceeds the ${max}-character limit.`);
@@ -33,8 +38,10 @@ export function requireText(body: unknown, field: string, min: number, max: numb
 export function optionalText(body: unknown, field: string, max: number): string | undefined {
   const value = (body as Record<string, unknown> | null)?.[field];
   if (value === undefined || value === null || value === "") return undefined;
-  if (typeof value !== "string") throw new HttpError(400, "invalid_input", `"${field}" must be a string.`);
-  if (value.length > max) throw new HttpError(413, "input_too_large", `"${field}" exceeds ${max} characters.`);
+  if (typeof value !== "string")
+    throw new HttpError(400, "invalid_input", `"${field}" must be a string.`);
+  if (value.length > max)
+    throw new HttpError(413, "input_too_large", `"${field}" exceeds ${max} characters.`);
   return value;
 }
 
@@ -94,7 +101,10 @@ export async function handleApi(
     return Response.json(data, { headers: { ...cors, "cache-control": "no-store" } });
   } catch (error) {
     if (error instanceof HttpError) {
-      return Response.json({ error: error.code, message: error.message }, { status: error.status, headers: cors });
+      return Response.json(
+        { error: error.code, message: error.message },
+        { status: error.status, headers: cors },
+      );
     }
     console.error("[api] unhandled error:", error instanceof Error ? error.message : "unknown");
     return Response.json(

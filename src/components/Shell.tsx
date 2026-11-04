@@ -25,7 +25,6 @@ const NAV = [
   { to: "/certificate", label: "Certificate Studio", icon: Award, code: "CRT-06" },
 ] as const;
 
-
 export function Shell({
   children,
   title,
@@ -100,7 +99,9 @@ export function Shell({
         <footer className="border-t border-border px-4 py-5 text-xs text-muted-foreground lg:px-8">
           SentinelOps AI · Autonomous Security &amp; DevOps Agents · Built for EU enterprise
           compliance (GDPR · CRA · NIS2)
-          <span className="mt-1 block font-mono text-[10px] tracking-wider opacity-70">build {__BUILD_ID__}</span>
+          <span className="mt-1 block font-mono text-[10px] tracking-wider opacity-70">
+            build {__BUILD_ID__}
+          </span>
         </footer>
       </div>
     </div>

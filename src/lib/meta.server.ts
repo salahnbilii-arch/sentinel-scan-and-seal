@@ -1,10 +1,16 @@
 import { HttpError } from "./api-helpers.server";
-import { detectLanguage, runSecurityScan, type Finding, type ScanReport, type Severity, type SourceLanguage } from "./agents.server";
+import {
+  detectLanguage,
+  runSecurityScan,
+  type Finding,
+  type ScanReport,
+  type Severity,
+  type SourceLanguage,
+} from "./agents.server";
 
 // Re-exported so the model layer and its tests share the scanner's single language heuristic.
 export { detectLanguage };
 export type { SourceLanguage };
-
 
 /** The only model this app calls. There is no fallback to any other model. */
 export const META_MODEL = "meta-models/muse-spark-open-1026";
@@ -23,7 +29,10 @@ export interface MetaOutput {
 }
 
 type Choice = { message?: { content?: unknown }; finish_reason?: string };
-type Completion = { choices?: Choice[]; usage?: { prompt_tokens?: number; completion_tokens?: number } };
+type Completion = {
+  choices?: Choice[];
+  usage?: { prompt_tokens?: number; completion_tokens?: number };
+};
 
 /** Ids and CWEs a model answer may cite. Anything else is an invented finding. */
 export function citationProblems(answer: string, findings: Finding[]): string[] {
@@ -52,14 +61,21 @@ export function patchLanguageDirective(code: string): string {
 /** Explain output languages. The findings, ids and patch-language rules never change — only the prose. */
 export const EXPLAIN_LANGUAGES = [
   { code: "en", label: "English", directive: "Write the entire explanation in English." },
-  { code: "ar", label: "العربية", directive: "Write the entire explanation in Arabic (Modern Standard Arabic), right-to-left. Keep rule ids, CWE ids and code identifiers exactly as they are." },
+  {
+    code: "ar",
+    label: "العربية",
+    directive:
+      "Write the entire explanation in Arabic (Modern Standard Arabic), right-to-left. Keep rule ids, CWE ids and code identifiers exactly as they are.",
+  },
   { code: "fr", label: "Français", directive: "Write the entire explanation in French." },
 ] as const;
 
 export type ExplainLanguage = (typeof EXPLAIN_LANGUAGES)[number]["code"];
 
 export function languageDirective(lang: ExplainLanguage): string {
-  return EXPLAIN_LANGUAGES.find((l) => l.code === lang)?.directive ?? EXPLAIN_LANGUAGES[0].directive;
+  return (
+    EXPLAIN_LANGUAGES.find((l) => l.code === lang)?.directive ?? EXPLAIN_LANGUAGES[0].directive
+  );
 }
 
 /** Fail-closed chat call. Empty output (typically hidden-reasoning exhaustion, finish_reason "length"),
@@ -73,7 +89,12 @@ export async function callMuse(
   validate?: (text: string) => string | null,
 ): Promise<MetaOutput> {
   const key = process.env["BASETEN_API_KEY"];
-  if (!key) throw new HttpError(503, "model_unavailable", "The Meta model is not configured. Set BASETEN_API_KEY on the server.");
+  if (!key)
+    throw new HttpError(
+      503,
+      "model_unavailable",
+      "The Meta model is not configured. Set BASETEN_API_KEY on the server.",
+    );
   const t0 = Date.now();
   let lastReason = "empty_answer";
   for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
@@ -95,23 +116,36 @@ export async function callMuse(
       });
     } catch {
       console.error(`[meta] attempt ${attempt}: request failed or timed out`);
-      throw new HttpError(502, "model_unavailable", "The Meta model could not be reached in time. Nothing was generated.");
+      throw new HttpError(
+        502,
+        "model_unavailable",
+        "The Meta model could not be reached in time. Nothing was generated.",
+      );
     }
     if (!res.ok) {
       console.error(`[meta] attempt ${attempt}: upstream status ${res.status}`);
-      throw new HttpError(502, "model_unavailable", `The Meta model returned an error (${res.status}). Nothing was generated.`);
+      throw new HttpError(
+        502,
+        "model_unavailable",
+        `The Meta model returned an error (${res.status}). Nothing was generated.`,
+      );
     }
     let json: Completion;
     try {
       json = (await res.json()) as Completion;
     } catch {
-      throw new HttpError(502, "model_unavailable", "The Meta model returned an unreadable response.");
+      throw new HttpError(
+        502,
+        "model_unavailable",
+        "The Meta model returned an unreadable response.",
+      );
     }
     const choice = json.choices?.[0];
     const content = choice?.message?.content;
     const text = typeof content === "string" ? content.trim() : "";
     if (text.length < 40) {
-      lastReason = choice?.finish_reason === "length" ? "reasoning_budget_exhausted" : "empty_answer";
+      lastReason =
+        choice?.finish_reason === "length" ? "reasoning_budget_exhausted" : "empty_answer";
       console.error(`[meta] attempt ${attempt}: ${lastReason}`);
       continue;
     }
@@ -132,7 +166,10 @@ export async function callMuse(
       text,
       latencyMs: Date.now() - t0,
       attempts: attempt,
-      usage: { promptTokens: json.usage?.prompt_tokens ?? null, completionTokens: json.usage?.completion_tokens ?? null },
+      usage: {
+        promptTokens: json.usage?.prompt_tokens ?? null,
+        completionTokens: json.usage?.completion_tokens ?? null,
+      },
     };
   }
   const msg =
@@ -143,13 +180,16 @@ export async function callMuse(
         : "The Meta model returned no usable answer after one retry. Nothing was generated.";
   throw new HttpError(
     502,
-    lastReason === "invented_findings" || lastReason === "wrong_language" ? "model_output_rejected" : "model_unavailable",
+    lastReason === "invented_findings" || lastReason === "wrong_language"
+      ? "model_output_rejected"
+      : "model_unavailable",
     msg,
   );
 }
 
 const SEV_ORDER: Record<Severity, number> = { critical: 0, high: 1, medium: 2, low: 3 };
-const ordered = (f: Finding[]) => [...f].sort((a, b) => SEV_ORDER[a.severity] - SEV_ORDER[b.severity] || a.line - b.line);
+const ordered = (f: Finding[]) =>
+  [...f].sort((a, b) => SEV_ORDER[a.severity] - SEV_ORDER[b.severity] || a.line - b.line);
 
 const brief = (f: Finding) => ({
   id: f.id,
@@ -162,7 +202,12 @@ const brief = (f: Finding) => ({
   referencePatch: f.patch,
 });
 
-const facts = (r: ScanReport) => ({ verdict: r.verdict, riskScore: r.riskScore, counts: r.counts, findingCount: r.findings.length });
+const facts = (r: ScanReport) => ({
+  verdict: r.verdict,
+  riskScore: r.riskScore,
+  counts: r.counts,
+  findingCount: r.findings.length,
+});
 
 const FORMAT = `Use EXACTLY this markdown structure and nothing else:
 
@@ -184,7 +229,11 @@ function frame(system: string, r: ScanReport, extra: string) {
   };
 }
 
-const numbered = (src: string) => src.split("\n").map((l, i) => `${String(i + 1).padStart(4)} | ${l}`).join("\n");
+const numbered = (src: string) =>
+  src
+    .split("\n")
+    .map((l, i) => `${String(i + 1).padStart(4)} | ${l}`)
+    .join("\n");
 
 export async function explainFindings(code: string, language: ExplainLanguage = "en") {
   const report = await runSecurityScan(code); // the model only ever sees genuine scanner output
@@ -193,7 +242,8 @@ export async function explainFindings(code: string, language: ExplainLanguage = 
       nothingToDo: true as const,
       scanId: report.scanId,
       inputSha256: report.inputSha256,
-      message: "The scan found no findings, so there is nothing to explain. The model was not called.",
+      message:
+        "The scan found no findings, so there is nothing to explain. The model was not called.",
     };
   const { system, user } = frame(
     `You explain static-analysis findings to a developer who is not a security specialist. Plain language: what is wrong, what an attacker could do. At most 60 words per finding. ${languageDirective(language)}`,
@@ -201,7 +251,10 @@ export async function explainFindings(code: string, language: ExplainLanguage = 
     patchLanguageDirective(code),
   );
   // Arabic is script-verifiable: an answer without Arabic script is a wrong-language answer.
-  const validate = language === "ar" ? (text: string) => (/[\u0600-\u06FF]/.test(text) ? null : "wrong_language") : undefined;
+  const validate =
+    language === "ar"
+      ? (text: string) => (/[\u0600-\u06FF]/.test(text) ? null : "wrong_language")
+      : undefined;
   const out = await callMuse(system, user, report.findings, validate);
   return {
     nothingToDo: false as const,
@@ -220,7 +273,8 @@ export async function runDeepAnalysis(code: string) {
       nothingToDo: true as const,
       scanId: report.scanId,
       inputSha256: report.inputSha256,
-      message: "The scan found no findings, so there is nothing to analyse in depth. The model was not called.",
+      message:
+        "The scan found no findings, so there is nothing to analyse in depth. The model was not called.",
     };
   const { system, user } = frame(
     "You are a senior application-security reviewer writing a deep audit. For each finding explain exploitability and impact in 80 words or fewer, then give a hardened replacement for the vulnerable line(s).",

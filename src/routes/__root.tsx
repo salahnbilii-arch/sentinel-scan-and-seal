@@ -89,7 +89,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "SentinelOps AI — Autonomous Security & DevOps Platform" },
       {
         property: "og:description",
-        content: "AI-driven vulnerability neutralisation and self-healing infrastructure for enterprise teams.",
+        content:
+          "AI-driven vulnerability neutralisation and self-healing infrastructure for enterprise teams.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

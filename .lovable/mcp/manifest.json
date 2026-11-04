@@ -5,9 +5,7 @@
   "auth": {
     "type": "oauth",
     "issuer": "https://apdeqpbmdykewbsopliq.supabase.co/auth/v1",
-    "accepted_audiences": [
-      "authenticated"
-    ]
+    "accepted_audiences": ["authenticated"]
   },
   "mcp": {
     "server": {
@@ -39,9 +37,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "source"
-          ]
+          "required": ["source"]
         },
         "outputSchema": null
       },
@@ -64,9 +60,7 @@
               "description": "Raw CI/CD, container or Kubernetes failure log output."
             }
           },
-          "required": [
-            "log"
-          ]
+          "required": ["log"]
         },
         "outputSchema": null
       },
@@ -93,9 +87,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "source"
-          ]
+          "required": ["source"]
         },
         "outputSchema": null
       }

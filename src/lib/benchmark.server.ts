@@ -1,7 +1,11 @@
 import { RULES, runSecurityScan } from "./agents.server";
 
 // Samples are bundled at build time (no filesystem access on the edge runtime).
-const SAMPLES = import.meta.glob("./benchmark/*", { query: "?raw", import: "default", eager: true }) as Record<string, string>;
+const SAMPLES = import.meta.glob("./benchmark/*", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+}) as Record<string, string>;
 
 export interface NaiveBaseline {
   patterns: string[];
@@ -16,7 +20,14 @@ export interface NaiveBaseline {
 export interface BenchmarkResult {
   vulnerableSamples: number;
   cleanSamples: number;
-  perRule: Array<{ ruleId: string; cwe: string; title: string; sample: string; caught: boolean; findingsOnSample: number }>;
+  perRule: Array<{
+    ruleId: string;
+    cwe: string;
+    title: string;
+    sample: string;
+    caught: boolean;
+    findingsOnSample: number;
+  }>;
   caught: number;
   missed: number;
   detectionRate: number;
@@ -25,7 +36,13 @@ export interface BenchmarkResult {
   cleanSamplesPassed: number;
   /** Measured comparison: the same samples run through a naive substring grep. */
   baseline: NaiveBaseline;
-  perSample: Array<{ sample: string; kind: "vulnerable" | "clean"; scannerFlagged: boolean; naiveFlagged: boolean; naiveMatches: string[] }>;
+  perSample: Array<{
+    sample: string;
+    kind: "vulnerable" | "clean";
+    scannerFlagged: boolean;
+    naiveFlagged: boolean;
+    naiveMatches: string[];
+  }>;
   computedAt: string;
 }
 
@@ -36,9 +53,22 @@ export interface BenchmarkResult {
  * the scanner runs on.
  */
 export const NAIVE_PATTERNS = [
-  "eval", "password", "md5", "secret", "token", "shell=true", "verify=false",
-  ":latest", "privileged: true", "console.log", "select ", "docker.sock",
-  "user root", "access-control-allow-origin", "print(", "debug",
+  "eval",
+  "password",
+  "md5",
+  "secret",
+  "token",
+  "shell=true",
+  "verify=false",
+  ":latest",
+  "privileged: true",
+  "console.log",
+  "select ",
+  "docker.sock",
+  "user root",
+  "access-control-allow-origin",
+  "print(",
+  "debug",
 ];
 
 export function naiveScan(text: string): string[] {
@@ -73,11 +103,24 @@ export async function runBenchmark(): Promise<BenchmarkResult> {
         caught: report.findings.some((f) => f.ruleId === ruleId),
         findingsOnSample: report.findings.length,
       });
-      perSample.push({ sample: file, kind: "vulnerable", scannerFlagged: report.findings.length > 0, naiveFlagged: naive.length > 0, naiveMatches: naive });
+      perSample.push({
+        sample: file,
+        kind: "vulnerable",
+        scannerFlagged: report.findings.length > 0,
+        naiveFlagged: naive.length > 0,
+        naiveMatches: naive,
+      });
     } else if (file.startsWith("clean-")) {
       cleanSamples += 1;
-      if (report.findings.length) falsePositiveFiles.push({ sample: file, ruleIds: report.findings.map((f) => f.ruleId) });
-      perSample.push({ sample: file, kind: "clean", scannerFlagged: false, naiveFlagged: naive.length > 0, naiveMatches: naive });
+      if (report.findings.length)
+        falsePositiveFiles.push({ sample: file, ruleIds: report.findings.map((f) => f.ruleId) });
+      perSample.push({
+        sample: file,
+        kind: "clean",
+        scannerFlagged: false,
+        naiveFlagged: naive.length > 0,
+        naiveMatches: naive,
+      });
     }
   }
 

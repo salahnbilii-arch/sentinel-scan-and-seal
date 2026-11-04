@@ -113,9 +113,7 @@
 }
 
 @utility panel {
-  background:
-    linear-gradient(180deg, oklch(1 0 0 / 0.035), transparent 60%),
-    var(--color-surface);
+  background: linear-gradient(180deg, oklch(1 0 0 / 0.035), transparent 60%), var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-panel);

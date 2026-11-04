@@ -216,7 +216,9 @@ describe("scan patch language (findings cards)", () => {
     const r = await runSecurityScan("const handler = (input) => eval(input);");
     const sec3 = r.findings.find((f) => f.ruleId === "SEC-003");
     expect(sec3?.cwe).toBe("CWE-95");
-    expect(sec3?.patch ?? "").toContain("JSON.parse");
+    // a JavaScript patch is offered (dispatch table), never a Python one
+    expect(sec3?.patch ?? "").not.toMatch(/def |os\.|subprocess/);
+    expect(sec3?.patch ?? "").toMatch(/as const|=>|function/);
   });
 
   it("Unknown language → no patch for language-tied rules", async () => {

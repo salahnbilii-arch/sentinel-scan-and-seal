@@ -1,1 +1,68 @@
-{"source": "code archive (sentinel-spark-guardian-main.zip, Lovable project export of SentinelOps AI)", "capabilities": [{"capability": "application code (dashboard, scanner, healer, verify, explain, certificate, compliance, repo pages)", "source": "archive src/", "outcome": "copied into project", "status": "done", "next_action": null}, {"capability": "TanStack server routes /api/public/v1 (scan-code, devops-heal, explain, deep-analysis, verify, check-signature, benchmark, rules, health, counters)", "source": "archive src/routes/api", "outcome": "copied into project", "status": "done", "next_action": null}, {"capability": "database schema (api_counters, api_counters_meta, increment_api_counter)", "source": "archive drizzle migration", "outcome": "applied to Lovable Cloud", "status": "done", "next_action": null}, {"capability": "records (api_counters values)", "source": "none in archive", "outcome": "counters start at zero; no user data existed", "status": "accepted", "next_action": null}, {"capability": "authentication (email/password + Google sign-in)", "source": "archive login.tsx", "outcome": "email auth enabled, Google provider enabled, OAuth server active", "status": "configured", "next_action": "verify sign-in in preview"}, {"capability": "MCP server + OAuth consent route", "source": "archive src/lib/mcp, .lovable/mcp manifest, [.mcp]/[.well-known] routes", "outcome": "copied into project; OAuth server configured", "status": "configured", "next_action": "verify consent flow after publish"}, {"capability": "Baseten model explanations (meta-models/muse-spark-open-1026)", "source": "archive src/lib/meta.server.ts", "outcome": "code copied; needs BASETEN_API_KEY secret", "status": "blocked_on_secret", "next_action": "request BASETEN_API_KEY via secrets"}, {"capability": "signed verification (HMAC audit key)", "source": "archive src/lib/verify.server.ts", "outcome": "code copied; needs SENTINELOPS_AUDIT_SIGNING_KEY secret", "status": "blocked_on_secret", "next_action": "request SENTINELOPS_AUDIT_SIGNING_KEY via secrets"}, {"capability": "published site cutover", "source": "original sentielops.lovable.app", "outcome": "new project preview is the replacement", "status": "pending", "next_action": "publish after verification"}]}
+{
+  "source": "code archive (sentinel-spark-guardian-main.zip, Lovable project export of SentinelOps AI)",
+  "capabilities": [
+    {
+      "capability": "application code (dashboard, scanner, healer, verify, explain, certificate, compliance, repo pages)",
+      "source": "archive src/",
+      "outcome": "copied into project",
+      "status": "done",
+      "next_action": null
+    },
+    {
+      "capability": "TanStack server routes /api/public/v1 (scan-code, devops-heal, explain, deep-analysis, verify, check-signature, benchmark, rules, health, counters)",
+      "source": "archive src/routes/api",
+      "outcome": "copied into project",
+      "status": "done",
+      "next_action": null
+    },
+    {
+      "capability": "database schema (api_counters, api_counters_meta, increment_api_counter)",
+      "source": "archive drizzle migration",
+      "outcome": "applied to Lovable Cloud",
+      "status": "done",
+      "next_action": null
+    },
+    {
+      "capability": "records (api_counters values)",
+      "source": "none in archive",
+      "outcome": "counters start at zero; no user data existed",
+      "status": "accepted",
+      "next_action": null
+    },
+    {
+      "capability": "authentication (email/password + Google sign-in)",
+      "source": "archive login.tsx",
+      "outcome": "sign-in reaches the new backend (real error responses); no users exist yet, they sign up in the app",
+      "status": "verified",
+      "next_action": null
+    },
+    {
+      "capability": "MCP server + OAuth consent route",
+      "source": "archive src/lib/mcp, .lovable/mcp manifest, [.mcp]/[.well-known] routes",
+      "outcome": "code + OAuth server active; consent flow verified after publish",
+      "status": "configured",
+      "next_action": "verify consent flow after publish"
+    },
+    {
+      "capability": "Baseten model explanations (meta-models/muse-spark-open-1026)",
+      "source": "archive src/lib/meta.server.ts",
+      "outcome": "secret set; /explain returns a real model explanation",
+      "status": "verified",
+      "next_action": null
+    },
+    {
+      "capability": "signed verification (HMAC audit key)",
+      "source": "archive src/lib/verify.server.ts",
+      "outcome": "secret set; /verify signs and /check-signature validates",
+      "status": "verified",
+      "next_action": null
+    },
+    {
+      "capability": "published site cutover",
+      "source": "original sentielops.lovable.app",
+      "outcome": "new project preview is the replacement",
+      "status": "pending",
+      "next_action": "publish after verification"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+spec:
+  containers:
+    - name: api
+      securityContext:
+        privileged: false
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false

@@ -10,33 +10,340 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CertificateRouteImport } from './routes/certificate'
+import { Route as ComplianceRouteImport } from './routes/compliance'
+import { Route as ExplainRouteImport } from './routes/explain'
+import { Route as HealerRouteImport } from './routes/healer'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as McpRouteImport } from './routes/mcp'
+import { Route as RepoRouteImport } from './routes/repo'
+import { Route as SentinelRouteImport } from './routes/sentinel'
+import { Route as VerifyRouteImport } from './routes/verify'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as ApiPublicV1BenchmarkRouteImport } from './routes/api/public/v1/benchmark'
+import { Route as ApiPublicV1CheckSignatureRouteImport } from './routes/api/public/v1/check-signature'
+import { Route as ApiPublicV1CountersRouteImport } from './routes/api/public/v1/counters'
+import { Route as ApiPublicV1DeepAnalysisRouteImport } from './routes/api/public/v1/deep-analysis'
+import { Route as ApiPublicV1DevopsHealRouteImport } from './routes/api/public/v1/devops-heal'
+import { Route as ApiPublicV1ExplainRouteImport } from './routes/api/public/v1/explain'
+import { Route as ApiPublicV1HealthRouteImport } from './routes/api/public/v1/health'
+import { Route as ApiPublicV1RulesRouteImport } from './routes/api/public/v1/rules'
+import { Route as ApiPublicV1ScanCodeRouteImport } from './routes/api/public/v1/scan-code'
+import { Route as ApiPublicV1VerifyRouteImport } from './routes/api/public/v1/verify'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CertificateRoute = CertificateRouteImport.update({
+  id: '/certificate',
+  path: '/certificate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComplianceRoute = ComplianceRouteImport.update({
+  id: '/compliance',
+  path: '/compliance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExplainRoute = ExplainRouteImport.update({
+  id: '/explain',
+  path: '/explain',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HealerRoute = HealerRouteImport.update({
+  id: '/healer',
+  path: '/healer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RepoRoute = RepoRouteImport.update({
+  id: '/repo',
+  path: '/repo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SentinelRoute = SentinelRouteImport.update({
+  id: '/sentinel',
+  path: '/sentinel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyRoute = VerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicV1BenchmarkRoute = ApiPublicV1BenchmarkRouteImport.update({
+  id: '/api/public/v1/benchmark',
+  path: '/api/public/v1/benchmark',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicV1CheckSignatureRoute =
+  ApiPublicV1CheckSignatureRouteImport.update({
+    id: '/api/public/v1/check-signature',
+    path: '/api/public/v1/check-signature',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicV1CountersRoute = ApiPublicV1CountersRouteImport.update({
+  id: '/api/public/v1/counters',
+  path: '/api/public/v1/counters',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicV1DeepAnalysisRoute = ApiPublicV1DeepAnalysisRouteImport.update({
+  id: '/api/public/v1/deep-analysis',
+  path: '/api/public/v1/deep-analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicV1DevopsHealRoute = ApiPublicV1DevopsHealRouteImport.update({
+  id: '/api/public/v1/devops-heal',
+  path: '/api/public/v1/devops-heal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicV1ExplainRoute = ApiPublicV1ExplainRouteImport.update({
+  id: '/api/public/v1/explain',
+  path: '/api/public/v1/explain',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicV1HealthRoute = ApiPublicV1HealthRouteImport.update({
+  id: '/api/public/v1/health',
+  path: '/api/public/v1/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicV1RulesRoute = ApiPublicV1RulesRouteImport.update({
+  id: '/api/public/v1/rules',
+  path: '/api/public/v1/rules',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicV1ScanCodeRoute = ApiPublicV1ScanCodeRouteImport.update({
+  id: '/api/public/v1/scan-code',
+  path: '/api/public/v1/scan-code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicV1VerifyRoute = ApiPublicV1VerifyRouteImport.update({
+  id: '/api/public/v1/verify',
+  path: '/api/public/v1/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/certificate': typeof CertificateRoute
+  '/compliance': typeof ComplianceRoute
+  '/explain': typeof ExplainRoute
+  '/healer': typeof HealerRoute
+  '/login': typeof LoginRoute
+  '/mcp': typeof McpRoute
+  '/repo': typeof RepoRoute
+  '/sentinel': typeof SentinelRoute
+  '/verify': typeof VerifyRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/v1/benchmark': typeof ApiPublicV1BenchmarkRoute
+  '/api/public/v1/check-signature': typeof ApiPublicV1CheckSignatureRoute
+  '/api/public/v1/counters': typeof ApiPublicV1CountersRoute
+  '/api/public/v1/deep-analysis': typeof ApiPublicV1DeepAnalysisRoute
+  '/api/public/v1/devops-heal': typeof ApiPublicV1DevopsHealRoute
+  '/api/public/v1/explain': typeof ApiPublicV1ExplainRoute
+  '/api/public/v1/health': typeof ApiPublicV1HealthRoute
+  '/api/public/v1/rules': typeof ApiPublicV1RulesRoute
+  '/api/public/v1/scan-code': typeof ApiPublicV1ScanCodeRoute
+  '/api/public/v1/verify': typeof ApiPublicV1VerifyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/certificate': typeof CertificateRoute
+  '/compliance': typeof ComplianceRoute
+  '/explain': typeof ExplainRoute
+  '/healer': typeof HealerRoute
+  '/login': typeof LoginRoute
+  '/mcp': typeof McpRoute
+  '/repo': typeof RepoRoute
+  '/sentinel': typeof SentinelRoute
+  '/verify': typeof VerifyRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/v1/benchmark': typeof ApiPublicV1BenchmarkRoute
+  '/api/public/v1/check-signature': typeof ApiPublicV1CheckSignatureRoute
+  '/api/public/v1/counters': typeof ApiPublicV1CountersRoute
+  '/api/public/v1/deep-analysis': typeof ApiPublicV1DeepAnalysisRoute
+  '/api/public/v1/devops-heal': typeof ApiPublicV1DevopsHealRoute
+  '/api/public/v1/explain': typeof ApiPublicV1ExplainRoute
+  '/api/public/v1/health': typeof ApiPublicV1HealthRoute
+  '/api/public/v1/rules': typeof ApiPublicV1RulesRoute
+  '/api/public/v1/scan-code': typeof ApiPublicV1ScanCodeRoute
+  '/api/public/v1/verify': typeof ApiPublicV1VerifyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/certificate': typeof CertificateRoute
+  '/compliance': typeof ComplianceRoute
+  '/explain': typeof ExplainRoute
+  '/healer': typeof HealerRoute
+  '/login': typeof LoginRoute
+  '/mcp': typeof McpRoute
+  '/repo': typeof RepoRoute
+  '/sentinel': typeof SentinelRoute
+  '/verify': typeof VerifyRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/v1/benchmark': typeof ApiPublicV1BenchmarkRoute
+  '/api/public/v1/check-signature': typeof ApiPublicV1CheckSignatureRoute
+  '/api/public/v1/counters': typeof ApiPublicV1CountersRoute
+  '/api/public/v1/deep-analysis': typeof ApiPublicV1DeepAnalysisRoute
+  '/api/public/v1/devops-heal': typeof ApiPublicV1DevopsHealRoute
+  '/api/public/v1/explain': typeof ApiPublicV1ExplainRoute
+  '/api/public/v1/health': typeof ApiPublicV1HealthRoute
+  '/api/public/v1/rules': typeof ApiPublicV1RulesRoute
+  '/api/public/v1/scan-code': typeof ApiPublicV1ScanCodeRoute
+  '/api/public/v1/verify': typeof ApiPublicV1VerifyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/certificate'
+    | '/compliance'
+    | '/explain'
+    | '/healer'
+    | '/login'
+    | '/mcp'
+    | '/repo'
+    | '/sentinel'
+    | '/verify'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
+    | '/api/public/v1/benchmark'
+    | '/api/public/v1/check-signature'
+    | '/api/public/v1/counters'
+    | '/api/public/v1/deep-analysis'
+    | '/api/public/v1/devops-heal'
+    | '/api/public/v1/explain'
+    | '/api/public/v1/health'
+    | '/api/public/v1/rules'
+    | '/api/public/v1/scan-code'
+    | '/api/public/v1/verify'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/certificate'
+    | '/compliance'
+    | '/explain'
+    | '/healer'
+    | '/login'
+    | '/mcp'
+    | '/repo'
+    | '/sentinel'
+    | '/verify'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
+    | '/api/public/v1/benchmark'
+    | '/api/public/v1/check-signature'
+    | '/api/public/v1/counters'
+    | '/api/public/v1/deep-analysis'
+    | '/api/public/v1/devops-heal'
+    | '/api/public/v1/explain'
+    | '/api/public/v1/health'
+    | '/api/public/v1/rules'
+    | '/api/public/v1/scan-code'
+    | '/api/public/v1/verify'
+  id:
+    | '__root__'
+    | '/'
+    | '/certificate'
+    | '/compliance'
+    | '/explain'
+    | '/healer'
+    | '/login'
+    | '/mcp'
+    | '/repo'
+    | '/sentinel'
+    | '/verify'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
+    | '/api/public/v1/benchmark'
+    | '/api/public/v1/check-signature'
+    | '/api/public/v1/counters'
+    | '/api/public/v1/deep-analysis'
+    | '/api/public/v1/devops-heal'
+    | '/api/public/v1/explain'
+    | '/api/public/v1/health'
+    | '/api/public/v1/rules'
+    | '/api/public/v1/scan-code'
+    | '/api/public/v1/verify'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CertificateRoute: typeof CertificateRoute
+  ComplianceRoute: typeof ComplianceRoute
+  ExplainRoute: typeof ExplainRoute
+  HealerRoute: typeof HealerRoute
+  LoginRoute: typeof LoginRoute
+  McpRoute: typeof McpRoute
+  RepoRoute: typeof RepoRoute
+  SentinelRoute: typeof SentinelRoute
+  VerifyRoute: typeof VerifyRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicV1BenchmarkRoute: typeof ApiPublicV1BenchmarkRoute
+  ApiPublicV1CheckSignatureRoute: typeof ApiPublicV1CheckSignatureRoute
+  ApiPublicV1CountersRoute: typeof ApiPublicV1CountersRoute
+  ApiPublicV1DeepAnalysisRoute: typeof ApiPublicV1DeepAnalysisRoute
+  ApiPublicV1DevopsHealRoute: typeof ApiPublicV1DevopsHealRoute
+  ApiPublicV1ExplainRoute: typeof ApiPublicV1ExplainRoute
+  ApiPublicV1HealthRoute: typeof ApiPublicV1HealthRoute
+  ApiPublicV1RulesRoute: typeof ApiPublicV1RulesRoute
+  ApiPublicV1ScanCodeRoute: typeof ApiPublicV1ScanCodeRoute
+  ApiPublicV1VerifyRoute: typeof ApiPublicV1VerifyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +355,196 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/certificate': {
+      id: '/certificate'
+      path: '/certificate'
+      fullPath: '/certificate'
+      preLoaderRoute: typeof CertificateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compliance': {
+      id: '/compliance'
+      path: '/compliance'
+      fullPath: '/compliance'
+      preLoaderRoute: typeof ComplianceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/explain': {
+      id: '/explain'
+      path: '/explain'
+      fullPath: '/explain'
+      preLoaderRoute: typeof ExplainRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/healer': {
+      id: '/healer'
+      path: '/healer'
+      fullPath: '/healer'
+      preLoaderRoute: typeof HealerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/repo': {
+      id: '/repo'
+      path: '/repo'
+      fullPath: '/repo'
+      preLoaderRoute: typeof RepoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sentinel': {
+      id: '/sentinel'
+      path: '/sentinel'
+      fullPath: '/sentinel'
+      preLoaderRoute: typeof SentinelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify': {
+      id: '/verify'
+      path: '/verify'
+      fullPath: '/verify'
+      preLoaderRoute: typeof VerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/benchmark': {
+      id: '/api/public/v1/benchmark'
+      path: '/api/public/v1/benchmark'
+      fullPath: '/api/public/v1/benchmark'
+      preLoaderRoute: typeof ApiPublicV1BenchmarkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/check-signature': {
+      id: '/api/public/v1/check-signature'
+      path: '/api/public/v1/check-signature'
+      fullPath: '/api/public/v1/check-signature'
+      preLoaderRoute: typeof ApiPublicV1CheckSignatureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/counters': {
+      id: '/api/public/v1/counters'
+      path: '/api/public/v1/counters'
+      fullPath: '/api/public/v1/counters'
+      preLoaderRoute: typeof ApiPublicV1CountersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/deep-analysis': {
+      id: '/api/public/v1/deep-analysis'
+      path: '/api/public/v1/deep-analysis'
+      fullPath: '/api/public/v1/deep-analysis'
+      preLoaderRoute: typeof ApiPublicV1DeepAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/devops-heal': {
+      id: '/api/public/v1/devops-heal'
+      path: '/api/public/v1/devops-heal'
+      fullPath: '/api/public/v1/devops-heal'
+      preLoaderRoute: typeof ApiPublicV1DevopsHealRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/explain': {
+      id: '/api/public/v1/explain'
+      path: '/api/public/v1/explain'
+      fullPath: '/api/public/v1/explain'
+      preLoaderRoute: typeof ApiPublicV1ExplainRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/health': {
+      id: '/api/public/v1/health'
+      path: '/api/public/v1/health'
+      fullPath: '/api/public/v1/health'
+      preLoaderRoute: typeof ApiPublicV1HealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/rules': {
+      id: '/api/public/v1/rules'
+      path: '/api/public/v1/rules'
+      fullPath: '/api/public/v1/rules'
+      preLoaderRoute: typeof ApiPublicV1RulesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/scan-code': {
+      id: '/api/public/v1/scan-code'
+      path: '/api/public/v1/scan-code'
+      fullPath: '/api/public/v1/scan-code'
+      preLoaderRoute: typeof ApiPublicV1ScanCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/verify': {
+      id: '/api/public/v1/verify'
+      path: '/api/public/v1/verify'
+      fullPath: '/api/public/v1/verify'
+      preLoaderRoute: typeof ApiPublicV1VerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CertificateRoute: CertificateRoute,
+  ComplianceRoute: ComplianceRoute,
+  ExplainRoute: ExplainRoute,
+  HealerRoute: HealerRoute,
+  LoginRoute: LoginRoute,
+  McpRoute: McpRoute,
+  RepoRoute: RepoRoute,
+  SentinelRoute: SentinelRoute,
+  VerifyRoute: VerifyRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicV1BenchmarkRoute: ApiPublicV1BenchmarkRoute,
+  ApiPublicV1CheckSignatureRoute: ApiPublicV1CheckSignatureRoute,
+  ApiPublicV1CountersRoute: ApiPublicV1CountersRoute,
+  ApiPublicV1DeepAnalysisRoute: ApiPublicV1DeepAnalysisRoute,
+  ApiPublicV1DevopsHealRoute: ApiPublicV1DevopsHealRoute,
+  ApiPublicV1ExplainRoute: ApiPublicV1ExplainRoute,
+  ApiPublicV1HealthRoute: ApiPublicV1HealthRoute,
+  ApiPublicV1RulesRoute: ApiPublicV1RulesRoute,
+  ApiPublicV1ScanCodeRoute: ApiPublicV1ScanCodeRoute,
+  ApiPublicV1VerifyRoute: ApiPublicV1VerifyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it, beforeAll, afterAll } from "vitest";
 import { runSecurityScan, runDevOpsHeal, ruleCatalog } from "../agents.server";
 import { runVerification, checkSignature, parseArtifact } from "../verify.server";

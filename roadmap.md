@@ -29,3 +29,10 @@ P1 Overview loads with live benchmark stats, no horizontal overflow; P2 Sentinel
 - [x] Added the dedicated /explain page (paste code → deterministic scan → EN/AR/FR Explain, patch matches input language, clean code never calls the model); sidebar stays at 7 entries
 - [x] Lock suite re-run on preview: 25/25 (scan REVIEW/24/SEC-003 x2, clean CLEAN/0, Explain model id + EN/AR/FR RTL, Healer npm 0.94, Deep analysis model+latency+tokens, Verify trust 80/digest/HMAC/Re-check/download match, Certificate empty→80/100 digest-prefix ID/no QR/honest footer, benchmark 12/12+0/8, sidebar 7, /gtm 404); 28/28 unit tests; typecheck clean
 - [x] Republished so the live URL serves the fixed build
+
+# Remix setup (2026-11-04)
+
+- [ ] Update BASETEN_API_KEY
+- [ ] Update SENTINELOPS_AUDIT_SIGNING_KEY
+- [ ] Fresh migration set + counters schema in the new database
+- [ ] Publish, then run gate against the published URL

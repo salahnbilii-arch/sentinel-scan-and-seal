@@ -5,8 +5,11 @@ const run = async ({ request }: { request: Request }) => {
   const { explainFindings } = await import("@/lib/meta.server");
   return handleApi(request, async (body) => {
     const code = requireText(body, "code", 1, MAX_ARTIFACT_CHARS);
+    // Only the three supported output languages; anything else falls back to English.
+    const requested = typeof body?.language === "string" ? body.language : "en";
+    const language = (["en", "ar", "fr"] as const).find((l) => l === requested) ?? "en";
     // Always re-scans server-side; clean input returns { nothingToDo: true } and never calls the model.
-    const result = await explainFindings(code);
+    const result = await explainFindings(code, language);
     const { recordAnalysis } = await import("@/lib/metrics.server");
     await recordAnalysis();
     return result;

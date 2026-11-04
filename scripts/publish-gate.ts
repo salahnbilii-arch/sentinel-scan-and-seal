@@ -30,6 +30,7 @@ npm ERR! Fix the upstream dependency conflict, or retry with --force`;
 const NAV_LABELS = [
   "Command Center",
   "AI Code Sentinel",
+  "Explain Findings",
   "Public Repo Scan",
   "DevOps Auto-Healer",
   "EU Compliance Hub",
@@ -303,10 +304,19 @@ async function main() {
     const html = await res.text();
     const navOk = NAV_LABELS.every((label) => html.includes(label));
     record(
-      `page ${page}: 200, 7-entry sidebar, no AGENTS ONLINE`,
+      `page ${page}: 200, 8-entry sidebar (incl. Explain Findings), no AGENTS ONLINE`,
       res.status === 200 && navOk && !html.includes("AGENTS ONLINE"),
       `status ${res.status}`,
     );
+    // The Compliance Hub must be its own content, not the Overview dashboard.
+    if (page === "/compliance") {
+      record(
+        "page /compliance: distinct hub content (framework mapping, no benchmark table)",
+        html.includes("Compliance framework mapping") &&
+          html.includes("Regulation (EU) 2016/679") &&
+          !html.includes("Per-rule benchmark"),
+      );
+    }
     // React SSR may split "build" and the id with a <!-- --> text-node comment.
     const footerBuild = /build (?:<!-- -->)?(sentinelops-\d{8}-\d{4}Z)/.exec(html)?.[1];
     if (markerOk)

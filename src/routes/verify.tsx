@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import { Shell } from "@/components/Shell";
 import { SectionBoundary } from "@/components/SectionBoundary";
 import { recheckSignature, verifyWithReport } from "@/lib/verify.functions";
-import { deliverFile } from "@/lib/download";
 import { fetchBenchmark } from "@/lib/benchmark.functions";
 import { buildEvidencePack } from "@/lib/evidence-pack";
 import { deliverFile } from "@/lib/download";

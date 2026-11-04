@@ -3,6 +3,7 @@ import { BrainCircuit, Loader2, Sparkle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { CodeTextarea } from "@/components/CodeTextarea";
 import { deepAnalyze } from "@/lib/ai.functions";
 
 const PLACEHOLDER = `Paste the artefact to analyse — source file, Terraform/K8s manifest or configuration. Clean input is re-scanned first and the model is not called.`;
@@ -38,9 +39,9 @@ export function DeepAnalysisPanel() {
         </span>
       </div>
 
-      <textarea
+      <CodeTextarea
         value={content}
-        onChange={(event) => setContent(event.target.value)}
+        onValueChange={setContent}
         rows={10}
         spellCheck={false}
         placeholder={PLACEHOLDER}

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Shell } from "@/components/Shell";
+import { CodeTextarea } from "@/components/CodeTextarea";
 import { SectionBoundary } from "@/components/SectionBoundary";
 import { Terminal } from "@/components/ops";
 import { healPipeline } from "@/lib/agents.functions";
@@ -113,9 +114,9 @@ function HealerPage() {
               ))}
             </div>
           </div>
-          <textarea
+          <CodeTextarea
             value={log}
-            onChange={(e) => setLog(e.target.value)}
+            onValueChange={setLog}
             spellCheck={false}
             rows={16}
             className="mt-3 w-full resize-y rounded-md border border-input bg-background/70 p-3 font-mono text-xs leading-relaxed outline-none focus:border-ring focus:ring-1 focus:ring-ring"

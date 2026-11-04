@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Shell } from "@/components/Shell";
+import { CodeTextarea } from "@/components/CodeTextarea";
 import { SectionBoundary } from "@/components/SectionBoundary";
 import { recheckSignature, verifyWithReport } from "@/lib/verify.functions";
 import { fetchBenchmark } from "@/lib/benchmark.functions";
@@ -150,9 +151,9 @@ function VerifyPage() {
               className="ml-auto rounded-md border border-input bg-background/70 px-2 py-1 font-mono text-xs"
             />
           </div>
-          <textarea
+          <CodeTextarea
             value={source}
-            onChange={(e) => setSource(e.target.value)}
+            onValueChange={setSource}
             spellCheck={false}
             rows={16}
             className="mt-3 w-full resize-y rounded-md border border-input bg-background/70 p-3 font-mono text-xs outline-none focus:border-ring"

@@ -6,13 +6,14 @@ import { toast } from "sonner";
 
 import { Shell } from "@/components/Shell";
 import { SectionBoundary } from "@/components/SectionBoundary";
-import { formalVerify, recheckSignature } from "@/lib/verify.functions";
+import { formalVerify, recheckSignature, verifyWithReport } from "@/lib/verify.functions";
 import { scanCode } from "@/lib/agents.functions";
 import { fetchBenchmark } from "@/lib/benchmark.functions";
 import { buildEvidencePack } from "@/lib/evidence-pack";
 import { deliverFile } from "@/lib/download";
 import { storeArtifact } from "@/lib/certificate-artifact";
 import type { SignedArtifact } from "@/lib/verify.server";
+import type { ScanReport } from "@/lib/agents.server";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/verify")({
@@ -40,7 +41,7 @@ const VULNERABLE = `API_KEY = "sk_live_9f8e7d6c5b4a3210"\nquery = "SELECT * FROM
 const CLEAN = `import os\nAPI_KEY = os.environ["API_KEY"]\nrows = db.execute("SELECT * FROM users WHERE id = %(id)s", {"id": user_id})`;
 
 function VerifyPage() {
-  const run = useServerFn(formalVerify);
+  const run = useServerFn(verifyWithReport);
   const recheck = useServerFn(recheckSignature);
   const scan = useServerFn(scanCode);
   const navigate = useNavigate();
@@ -48,6 +49,7 @@ function VerifyPage() {
   const [name, setName] = useState("artifact.txt");
   const [busy, setBusy] = useState(false);
   const [art, setArt] = useState<SignedArtifact | null>(null);
+  const [report, setReport] = useState<ScanReport | null>(null);
   const [check, setCheck] = useState<{ digestMatches: boolean; signatureValid: boolean } | null>(
     null,
   );
@@ -57,12 +59,14 @@ function VerifyPage() {
   async function verify() {
     setBusy(true);
     setArt(null);
+    setReport(null);
     setCheck(null);
     try {
       const result = await run({ data: { source, artifactName: name || "artifact.txt" } });
-      setArt(result);
+      setArt(result.artifact);
+      setReport(result.scanReport);
       // The certificate page is generated only from this stored Verify result.
-      storeArtifact(result);
+      storeArtifact(result.artifact);
     } catch (error) {
       toast.error("Verification failed", {
         description: error instanceof Error ? error.message : undefined,
@@ -84,16 +88,15 @@ function VerifyPage() {
   }
 
   /** Builds the zip first; the download itself then runs synchronously from its own
-   *  click, so user activation is preserved (iOS drops it after an await). */
+   *  click, so user activation is preserved (iOS drops it after an await). The
+   *  scan report comes from the same verify run (matching scanId), never a
+   *  second scan. */
   async function buildPack() {
-    if (!art) return;
+    if (!art || !report) return;
     setPackBusy(true);
     setPack(null);
     try {
-      const [report, benchmark] = await Promise.all([
-        scan({ data: { code: source, filename: name || "artifact.txt" } }),
-        fetchBenchmark(),
-      ]);
+      const benchmark = await fetchBenchmark();
       setPack(await buildEvidencePack({ report, artifact: art, benchmark }));
     } catch (error) {
       toast.error("The evidence pack could not be built. Try again.", {
@@ -288,7 +291,7 @@ function VerifyPage() {
                   {pack ? (
                     <span className="font-mono text-[11px] text-muted-foreground">
                       scan-report.json · signed-verification.json · benchmark.json · manifest.json —
-                      every file from a real run
+                      one run, scanId {art.scanId} · artifactId {art.artifactId} in every file
                     </span>
                   ) : null}
                 </div>

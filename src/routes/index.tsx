@@ -256,7 +256,8 @@ function CountersSection({ counters }: { counters: ApiCounters | null }) {
     <section className="panel mt-4 p-5">
       <h2 className="text-base font-semibold">Public API usage</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Work actually served by the public API{" "}
+        Counts the public API endpoints only — dashboard scans are separate and not counted. Work
+        actually served by the public API{" "}
         {counters.activeSince
           ? `since ${new Date(counters.activeSince).toUTCString()}`
           : "— no request has been counted yet"}

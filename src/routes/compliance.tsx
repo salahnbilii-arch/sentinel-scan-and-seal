@@ -1,7 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { FileCheck2, Globe2, Lock, ShieldCheck } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { FileCheck2, Globe2, Lock, Scale, ShieldCheck } from "lucide-react";
 
-import { DeepAnalysisPanel } from "@/components/DeepAnalysisPanel";
 import { SectionBoundary } from "@/components/SectionBoundary";
 import { Shell } from "@/components/Shell";
 
@@ -47,13 +46,60 @@ const CONTROLS = [
   },
 ];
 
+/** Framework mapping. Every entry states what the product actually does — the
+ *  claims are limited to mechanisms that exist in this application. */
+const FRAMEWORKS = [
+  {
+    name: "GDPR",
+    official: "Regulation (EU) 2016/679",
+    items: [
+      "Art. 5(1)(c) data minimisation — source code is analysed in memory and discarded; nothing user-submitted is stored.",
+      "Art. 5(1)(b) purpose limitation — the service processes code for security analysis only; no profiling and no marketing use.",
+      "Art. 25 data protection by design — the machine interface returns findings and counters, never raw submitted content.",
+      "Art. 32 security of processing — audit artifacts are hashed (SHA-256) and signed (HMAC-SHA256) so records can be checked for tampering.",
+    ],
+  },
+  {
+    name: "EU Cyber Resilience Act",
+    official: "Regulation (EU) 2024/2847",
+    items: [
+      "Secure-by-default guidance — every finding ships with a concrete remediation patch in the language of the scanned code.",
+      "Vulnerability handling — the 12-rule scanner detects hardcoded credentials, injection sinks, weak transport and weak hashing.",
+      "Transparent documentation — each finding carries a rule ID and CWE reference so reports map to a public weakness taxonomy.",
+      "Support for SBOM workflows — the public /api/public/v1/rules endpoint exposes the exact rule and CWE catalog in machine-readable form.",
+    ],
+  },
+  {
+    name: "NIS2",
+    official: "Directive (EU) 2022/2555",
+    items: [
+      "Art. 21 risk-management measures — deterministic scanning, automated CI-log healing and signed verification form a measurable control set.",
+      "Incident and audit evidence — verification artifacts are signed and re-checkable, so an auditor can verify a record was not altered.",
+      "Supply-chain security — public repository scans give an aggregate gate verdict (blocked / review / clean) over dependencies' source.",
+      "Business continuity — the stateless edge deployment recovers automatically; no operator action is needed after an instance restart.",
+    ],
+  },
+];
+
+const EVIDENCE_LINKS = [
+  { to: "/verify", label: "Formal Verification", detail: "Run a signed, re-checkable audit artifact." },
+  { to: "/certificate", label: "Certificate Studio", detail: "Render an audit certificate from a real verify run." },
+  { to: "/repo", label: "Public Repo Scan", detail: "Aggregate gate verdict over a GitHub repository." },
+] as const;
+
 function CompliancePage() {
   return (
     <Shell
       title="EU Compliance Hub"
       subtitle="Continuous regulatory evidence for enterprise procurement and audit"
     >
-      <h2 className="mt-2 text-base font-semibold">Technical &amp; organisational measures</h2>
+      <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
+        This hub maps what SentinelOps AI actually does to the EU frameworks procurement teams ask
+        about. Every claim below is limited to a mechanism that exists in this application — the
+        dashboard modules, the signed artifacts and the public API are the proof.
+      </p>
+
+      <h2 className="mt-6 text-base font-semibold">Technical &amp; organisational measures</h2>
       <div className="mt-3 grid gap-4 md:grid-cols-2">
         {CONTROLS.map((c) => (
           <article key={c.title} className="panel flex gap-4 p-5">
@@ -68,9 +114,56 @@ function CompliancePage() {
         ))}
       </div>
 
-      <SectionBoundary label="deep-analysis">
-        <DeepAnalysisPanel />
+      <SectionBoundary label="framework-mapping">
+        <section className="panel mt-8 p-6">
+          <h2 className="text-base font-semibold">Compliance framework mapping</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Article-level mapping for GDPR, the Cyber Resilience Act and NIS2, with the mechanism
+            behind each line.
+          </p>
+          <div className="mt-4 space-y-6">
+            {FRAMEWORKS.map((f) => (
+              <div key={f.name}>
+                <div className="flex flex-wrap items-baseline gap-2">
+                  <h3 className="font-display text-lg font-semibold">{f.name}</h3>
+                  <span className="font-mono text-[11px] text-muted-foreground">{f.official}</span>
+                </div>
+                <ul className="mt-2 space-y-2">
+                  {f.items.map((item) => (
+                    <li
+                      key={item}
+                      className="flex gap-2 rounded-md border border-border bg-surface-raised/40 p-3 text-sm"
+                    >
+                      <Scale className="mt-0.5 size-4 shrink-0 text-primary" />
+                      <span className="text-muted-foreground">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-xs text-muted-foreground">
+            This mapping describes implemented product mechanisms. It is not a certification and
+            does not replace an audit by an accredited body.
+          </p>
+        </section>
       </SectionBoundary>
+
+      <section className="panel mt-8 p-6">
+        <h2 className="text-base font-semibold">Evidence you can check yourself</h2>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          {EVIDENCE_LINKS.map((l) => (
+            <Link
+              key={l.to}
+              to={l.to}
+              className="rounded-md border border-border bg-background/60 p-4 transition-colors hover:border-primary/40"
+            >
+              <div className="text-sm font-semibold">{l.label}</div>
+              <div className="mt-1 text-xs text-muted-foreground">{l.detail}</div>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <section className="panel mt-8 p-6">
         <h2 className="text-base font-semibold">Public API surface</h2>

@@ -1,5 +1,5 @@
 import { HttpError } from "./api-helpers.server";
-import { runSecurityScan, sha256, type Severity } from "./agents.server";
+import { runSecurityScan, sha256, type ScanReport, type Severity } from "./agents.server";
 
 /**
  * Heuristic obligation checks. An obligation is satisfied when none of its scanner rules fired.
@@ -122,6 +122,16 @@ export async function runVerification(
   source: string,
   artifactName = "artifact.txt",
 ): Promise<SignedArtifact> {
+  return (await runVerificationWithReport(source, artifactName)).artifact;
+}
+
+/** Same run as runVerification, but also returns the full scan report so the
+ *  evidence pack can ship scan-report.json from the very run that produced the
+ *  signed artifact (matching scanId) instead of a second, separate scan. */
+export async function runVerificationWithReport(
+  source: string,
+  artifactName = "artifact.txt",
+): Promise<{ artifact: SignedArtifact; scanReport: ScanReport }> {
   const key = signingKey(); // fail early and gracefully when unset
   const scan = await runSecurityScan(source, artifactName);
   const fired = new Set(scan.findings.map((f) => f.ruleId));
@@ -153,17 +163,20 @@ export async function runVerification(
   };
   const digest = await sha256(canonical(base));
   return {
-    artifactId: digest.slice(0, 16),
-    ...base,
-    method: METHOD,
-    trustFormula: TRUST_FORMULA,
-    scanId: scan.scanId,
-    violatedCount,
-    trustScore,
-    digest,
-    signatureAlgorithm: SIGNATURE_ALGORITHM,
-    signature: await sign(digest, key),
-    issuedAt: new Date().toISOString(),
+    artifact: {
+      artifactId: digest.slice(0, 16),
+      ...base,
+      method: METHOD,
+      trustFormula: TRUST_FORMULA,
+      scanId: scan.scanId,
+      violatedCount,
+      trustScore,
+      digest,
+      signatureAlgorithm: SIGNATURE_ALGORITHM,
+      signature: await sign(digest, key),
+      issuedAt: new Date().toISOString(),
+    },
+    scanReport: scan,
   };
 }
 

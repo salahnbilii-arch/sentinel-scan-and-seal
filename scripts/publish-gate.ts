@@ -149,6 +149,35 @@ async function main() {
     JSON.stringify({ verdict: scan2.json?.verdict, risk: scan2.json?.riskScore }),
   );
 
+  // ---- file-type scoping: rules never fire across file types ----------------
+  const pyImports = `from os import system
+from subprocess import run
+import requests
+
+def build():
+    return requests.get("https://example.com")`;
+  const scope1 = await post("/api/public/v1/scan-code", {
+    code: pyImports,
+    filename: "src/requests/auth.py",
+  });
+  record(
+    "scope: SEC-005 never fires on a Python file (import lines are not Dockerfiles)",
+    scope1.status === 200 && (scope1.json?.findings ?? []).length === 0,
+    JSON.stringify(scope1.json?.findings?.map((f: any) => f.ruleId)),
+  );
+  const dockerProbe = `FROM node:22.11.0-bookworm-slim
+WORKDIR /app
+COPY . .
+CMD ["node", "index.js"]`;
+  const scope2 = await post("/api/public/v1/scan-code", {
+    code: dockerProbe,
+    filename: "Dockerfile",
+  });
+  record(
+    "scope: SEC-005 still fires on a Dockerfile that never drops privileges",
+    (scope2.json?.findings ?? []).some((f: any) => f.ruleId === "SEC-005" && f.cwe === "CWE-250"),
+  );
+
   // ---- scan: clean ----------------------------------------------------------
   const scanClean = await post("/api/public/v1/scan-code", {
     code: CLEAN_PY,
@@ -176,6 +205,7 @@ async function main() {
   // ---- explain: three languages ---------------------------------------------
   const languages = ["en", "ar", "fr"] as const;
   const explanations: Record<string, string> = {};
+  const exUsage: Record<string, number | null | undefined> = {};
   for (const lang of languages) {
     const ex = await post("/api/public/v1/explain", { code: VULN_PY, language: lang });
     const ok =
@@ -184,9 +214,18 @@ async function main() {
       typeof ex.json?.explanation === "string" &&
       ex.json.explanation.length > 100;
     explanations[lang] = ex.json?.explanation ?? "";
+    exUsage[lang] = ex.json?.usage?.completionTokens;
     record(`explain ${lang}: model id visible, non-empty explanation`, ok, ex.text.slice(0, 160));
   }
   record("explain ar: arabic script present", /[\u0600-\u06FF]/.test(explanations.ar));
+  record(
+    "explain: usage tokens returned (model id · latency · output tokens)",
+    languages.every((lang) => {
+      const tokens = exUsage[lang];
+      return typeof tokens === "number" && tokens > 0;
+    }),
+    JSON.stringify(exUsage),
+  );
   record(
     "explain fr: differs from en",
     explanations.fr !== explanations.en && explanations.fr.length > 100,
@@ -322,6 +361,16 @@ async function main() {
         "page /: no compliance-hub content on the Overview",
         !html.includes("Compliance framework mapping"),
       );
+      record(
+        "page /: counters keep the explicit public-API-only label",
+        html.includes("public API endpoints only"),
+      );
+    }
+    if (page === "/explain") {
+      record(
+        "page /explain: Deep Analysis Engine mounted (token footer is a live-run check)",
+        html.includes("Deep Analysis Engine"),
+      );
     }
     // React SSR may split "build" and the id with a <!-- --> text-node comment.
     const footerBuild = /build (?:<!-- -->)?(sentinelops-\d{8}-\d{4}Z)/.exec(html)?.[1];
@@ -334,6 +383,11 @@ async function main() {
   }
   const gtm = await fetch(`${BASE}/gtm`);
   record("/gtm is gone (404)", gtm.status === 404, String(gtm.status));
+  record(
+    "sidebar: 8 entries with Explain Findings third",
+    NAV_LABELS.length === 8 && NAV_LABELS[2] === "Explain Findings",
+    NAV_LABELS.join(" | "),
+  );
 
   // ---- summary ---------------------------------------------------------------
   const failed = results.filter((r) => !r.pass);

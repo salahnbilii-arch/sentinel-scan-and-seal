@@ -5,6 +5,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Shell } from "@/components/Shell";
+import { CodeTextarea } from "@/components/CodeTextarea";
+import { DeepAnalysisPanel } from "@/components/DeepAnalysisPanel";
 import { SectionBoundary } from "@/components/SectionBoundary";
 import { SeverityBadge } from "@/components/ops";
 import { explainScan } from "@/lib/ai.functions";
@@ -106,9 +108,9 @@ function ExplainPage() {
               load sample
             </button>
           </div>
-          <textarea
+          <CodeTextarea
             value={code}
-            onChange={(e) => setCode(e.target.value)}
+            onValueChange={setCode}
             spellCheck={false}
             rows={14}
             className="mt-3 w-full resize-y rounded-md border border-input bg-background/70 p-3 font-mono text-xs leading-relaxed text-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring"
@@ -195,7 +197,8 @@ function ExplainPage() {
                   ) : (
                     <>
                       <p className="mt-3 font-mono text-[11px] text-muted-foreground">
-                        Explained by {out.model} · {out.latencyMs} ms
+                        Explained by {out.model} · {out.latencyMs} ms ·{" "}
+                        {out.usage?.completionTokens ?? "?"} output tokens
                       </p>
                       <pre
                         dir={lang === "ar" ? "rtl" : "ltr"}
@@ -247,6 +250,8 @@ function ExplainPage() {
           </SectionBoundary>
         </section>
       </div>
+
+      <DeepAnalysisPanel />
     </Shell>
   );
 }

@@ -51,6 +51,12 @@ interface Rule {
   detect: (source: string, lines: string[]) => number[];
   /** Optional per-hit CWE override; the correct CWE depends on the matched pattern. */
   cweFor?: (evidence: string) => string;
+  /**
+   * File types this rule may fire on. A rule that runs on any input is "any";
+   * otherwise the list is exhaustive. Scoping is how cross-type false positives
+   * are prevented (e.g. a Dockerfile rule must never fire on a Python import).
+   */
+  scope: readonly FileType[] | "any";
   /** Additional CWEs this rule can fire with (per-hit overrides of `cwe`), for the public catalog. */
   cweAliases?: string[];
   /** Patch suggestions keyed by input language; `all` is language-neutral (Dockerfile, Kubernetes, config). */
@@ -67,6 +73,57 @@ const perLine = (re: RegExp) => (_s: string, lines: string[]) =>
 const lineOfIndex = (source: string, index: number) => source.slice(0, index).split("\n").length;
 
 export type SourceLanguage = "python" | "javascript" | "unknown";
+
+/**
+ * What kind of input a scan is looking at, derived from the filename and — for
+ * extensionless pastes — from the content itself. Rules are scoped to these
+ * types; container rules never see source files and language rules never see
+ * infrastructure files.
+ */
+export type FileType = "python" | "javascript" | "container" | "kubernetes" | "manifest" | "other";
+
+export function classifyFileType(filename: string, source: string): FileType {
+  const base = (filename.split(/[\\/]/).pop() ?? "").toLowerCase();
+  if (
+    base.startsWith("dockerfile") ||
+    base.endsWith(".dockerfile") ||
+    base.includes("docker-compose") ||
+    base === ".dockerignore"
+  )
+    return "container";
+  if (
+    base === "package.json" ||
+    base === "package-lock.json" ||
+    base.endsWith(".lock") ||
+    base === "requirements.txt" ||
+    base === "pipfile" ||
+    base === "pyproject.toml"
+  )
+    return "manifest";
+  if (/\.(?:py|pyw)$/i.test(base)) return "python";
+  if (/\.(?:js|jsx|mjs|cjs|ts|tsx)$/i.test(base)) return "javascript";
+  if (/\.(?:ya?ml|tf|hcl)$/i.test(base))
+    return base.endsWith(".tf") ||
+      /(?:^|\n)\s*(?:containers?:|kind:\s*(?:deployment|pod|statefulset|daemonset)|privileged:)/i.test(
+        source,
+      )
+      ? "kubernetes"
+      : "other";
+  // Extensionless pastes: sniff the content. Container instructions are matched
+  // case-SENSITIVELY here — a case-insensitive match would collide with the
+  // Python `from x import y` statement.
+  if (/^\s*(?:FROM|RUN|CMD|ENTRYPOINT|EXPOSE|COPY|ADD|WORKDIR|ENV)\s+\S/m.test(source))
+    return "container";
+  if (/^\s*(?:apiVersion|kind|metadata|spec|volumes|containers)\s*:/m.test(source))
+    return "kubernetes";
+  const lang = detectLanguage(source);
+  if (lang === "python") return "python";
+  if (lang === "javascript") return "javascript";
+  return "other";
+}
+
+/** Rules that apply to "other" are the language-agnostic code rules; container rules never do. */
+const CODE_TYPES: readonly FileType[] = ["python", "javascript", "other"];
 
 /**
  * Best-effort language detection so finding patches always match the input language.
@@ -124,6 +181,7 @@ export const RULES: Rule[] = [
       "A long-lived credential is committed in source. Anyone who can read the repository, a CI cache or a fork obtains its access.",
     remediation:
       "Move the value to a secret store, read it at runtime, and rotate the exposed credential.",
+    scope: "any",
     detect: perLine(
       /(?:api[_-]?key|secret|passwd|password|token|access[_-]?key|private[_-]?key)\s*[:=]\s*["'`][^"'`\s]{6,}["'`]/i,
     ),
@@ -143,6 +201,7 @@ export const RULES: Rule[] = [
       "Input is interpolated into a SQL statement, so an attacker can change the query and read or alter data.",
     remediation:
       "Use parameterised queries or prepared statements; never concatenate input into SQL.",
+    scope: CODE_TYPES,
     detect: perLine(
       /\b(?:select\s.+\sfrom|insert\s+into|update\s+\w+\s+set|delete\s+from)\b.*(?:["'`]\s*\+|\+\s*["'`]|\$\{|%s|\bf["'])/i,
     ),
@@ -165,6 +224,7 @@ export const RULES: Rule[] = [
       "Evaluating a runtime string (eval, new Function) turns any input-handling bug into code execution (CWE-95); running OS commands from unsanitised input (os.system, shell=True, child_process.exec) lets an attacker execute shell commands (CWE-78). The CWE is chosen per matched pattern.",
     remediation:
       "Dispatch through an allow-listed map of functions or parse data with a safe parser; never pass input to a shell.",
+    scope: CODE_TYPES,
     detect: perLine(
       /(?<![.\w])(?:eval|exec|execSync)\s*\(|new\s+Function\s*\(|os\.system\s*\(|child_process\.exec(?:Sync)?\s*\(|shell\s*=\s*True/,
     ),
@@ -189,6 +249,7 @@ export const RULES: Rule[] = [
     description: "Without certificate validation any on-path attacker can read and modify traffic.",
     remediation:
       "Re-enable verification and install the correct CA bundle instead of bypassing trust.",
+    scope: "any",
     detect: perLine(
       /verify\s*=\s*False|rejectUnauthorized\s*:\s*false|NODE_TLS_REJECT_UNAUTHORIZED\s*=\s*["']?0|--insecure|curl\s+-k\b/i,
     ),
@@ -209,6 +270,7 @@ export const RULES: Rule[] = [
     description:
       "The image executes as UID 0, so any application escape becomes root on the container.",
     remediation: "Create an unprivileged user and switch to it before the entrypoint.",
+    scope: ["container"],
     detect: (source, lines) => {
       const explicitRoot = lines.findIndex((l) => /^\s*USER\s+root\s*$/i.test(l));
       if (explicitRoot >= 0) return [explicitRoot + 1];
@@ -230,6 +292,7 @@ export const RULES: Rule[] = [
     description:
       "Any origin may read responses, which enables cross-site data theft from a victim's session.",
     remediation: "Pin an explicit allow-list of trusted origins.",
+    scope: CODE_TYPES,
     detect: perLine(/Access-Control-Allow-Origin["'\s:=,]+\*|allow_origins\s*=\s*\[\s*["']\*/i),
     patch: {
       python: () =>
@@ -249,6 +312,7 @@ export const RULES: Rule[] = [
       "MD5 and SHA-1 are collision-broken and unfit for passwords, signatures or integrity checks.",
     remediation:
       "Use SHA-256 or better for integrity, and Argon2id, scrypt or bcrypt for passwords.",
+    scope: CODE_TYPES,
     detect: perLine(/\b(?:md5|sha1)\s*\(|createHash\(\s*["'](?:md5|sha1)["']/i),
     patch: {
       python: () =>
@@ -267,6 +331,7 @@ export const RULES: Rule[] = [
     description:
       "Debug mode can expose stack traces, environment variables and interactive consoles.",
     remediation: "Read the flag from the environment and default it to off.",
+    scope: [...CODE_TYPES, "container"],
     detect: perLine(/\b(?:DEBUG|debug)\s*[:=]\s*(?:True|true|1)\b/),
     patch: {
       python: () => `DEBUG = os.getenv("DEBUG", "false").lower() == "true"  # default off`,
@@ -284,6 +349,7 @@ export const RULES: Rule[] = [
     description:
       "A floating version makes builds non-reproducible and lets a compromised upstream release reach production.",
     remediation: "Pin exact versions or immutable image digests and upgrade through automation.",
+    scope: ["container", "kubernetes", "manifest"],
     detect: perLine(/^\s*FROM\s+\S+:latest\b|"[\w@/.-]+"\s*:\s*"(?:\*|latest)"/i),
     patch: { all: () => `FROM node:22.11.0-bookworm-slim@sha256:<digest>` },
   },
@@ -297,6 +363,7 @@ export const RULES: Rule[] = [
     description:
       "Identifiable data is sent to log sinks, which usually have wider access and longer retention than the database.",
     remediation: "Redact or hash identifiers before logging.",
+    scope: CODE_TYPES,
     detect: perLine(
       /(?:console\.log|print|logger?\.(?:info|debug|warn))\s*\([^)]*(?:email|password|ssn|iban|passport|phone|token)/i,
     ),
@@ -315,6 +382,7 @@ export const RULES: Rule[] = [
     compliance: ["GDPR Art. 32", "NIS2 Art. 21"],
     description: "A mutating endpoint has no identity check, so anonymous callers can write data.",
     remediation: "Require an authenticated principal and authorise the action for its role.",
+    scope: CODE_TYPES,
     detect: (source) => {
       const re =
         /@app\.(?:post|put|patch|delete)\([^)]*\)[ \t]*\r?\n[ \t]*(?:async\s+)?def\s+\w+\(([^)]*)\)/gi;
@@ -343,6 +411,7 @@ export const RULES: Rule[] = [
       "The workload can reach the container runtime or host network, which is equivalent to root on the node.",
     remediation:
       "Drop privileged mode, add only required capabilities and avoid mounting the Docker socket.",
+    scope: ["container", "kubernetes"],
     detect: perLine(/privileged:\s*true|hostNetwork:\s*true|\/var\/run\/docker\.sock/i),
     patch: {
       all: () =>
@@ -382,13 +451,17 @@ export async function runSecurityScan(
   const lines = source.split("\n");
   const findings: Finding[] = [];
   const lang = detectLanguage(source);
+  const fileType = classifyFileType(filename, source);
+  // Scoping: a rule only runs on file types it applies to. This is what keeps a
+  // Dockerfile rule from firing on a Python import line.
+  const active = RULES.filter((r) => r.scope === "any" || r.scope.includes(fileType));
   const trace = [
-    `scan: target=${filename} bytes=${source.length} lines=${lines.length}`,
-    `scan: applying ${RULES.length} rules`,
+    `scan: target=${filename} bytes=${source.length} lines=${lines.length} type=${fileType}`,
+    `scan: applying ${active.length}/${RULES.length} rules for type=${fileType}`,
     `scan: patch language=${lang}`,
   ];
 
-  for (const rule of RULES) {
+  for (const rule of active) {
     const hits = rule.detect(source, lines).slice(0, MAX_HITS_PER_RULE);
     for (const line of hits) {
       const evidence = (lines[line - 1] ?? "").trim();

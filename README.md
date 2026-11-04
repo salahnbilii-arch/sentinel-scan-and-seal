@@ -24,6 +24,26 @@ Live demo: https://sentinel-scan-and-seal.lovable.app (build sentinelops-2026110
 
 - `meta-models/muse-spark-open-1026` (Meta Muse Spark Open), called via Baseten inference (`https://inference.baseten.co/v1`, OpenAI-compatible). Used ONLY for: (1) Explain findings, (2) Deep analysis. No other runtime model is called. No Llama, no third-party model, no fallback. If the model is unavailable, those two features fail closed with an honest error — the deterministic scanner, healer, verifier, and benchmark keep working (they use no model at all).
 
+## Architecture diagram
+
+```text
+Paste code / repo URL
+      │  (deterministic, no model)
+      ▼
+Scanner ── findings + risk + patches
+      │  ┌────────────────┐
+      │  │ Explain / Deep │── Muse Spark Open (Baseten)
+      │  └────────────────┘
+      ▼
+Apply patch ──► Re-scan ──► CLEAN 0
+      │
+      ▼
+Verify (HMAC-SHA256) ──► signed artifact + certificate
+      │
+      ▼
+Benchmark ──► scanner 12/12 vs grep 9/12
+```
+
 ## Architecture (per part)
 
 | Part | Model | Input | Output | Inference location | Call |

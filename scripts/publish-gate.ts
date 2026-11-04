@@ -317,6 +317,12 @@ async function main() {
           !html.includes("Per-rule benchmark"),
       );
     }
+    if (page === "/") {
+      record(
+        "page /: no compliance-hub content on the Overview",
+        !html.includes("Compliance framework mapping"),
+      );
+    }
     // React SSR may split "build" and the id with a <!-- --> text-node comment.
     const footerBuild = /build (?:<!-- -->)?(sentinelops-\d{8}-\d{4}Z)/.exec(html)?.[1];
     if (markerOk)

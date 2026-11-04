@@ -368,8 +368,8 @@ CMD ["node", "index.js"]`;
     }
     if (page === "/explain") {
       record(
-        "page /explain: Deep Analysis Engine present with token footer",
-        html.includes("Deep Analysis Engine") && html.includes("output tokens"),
+        "page /explain: Deep Analysis Engine mounted (token footer is a live-run check)",
+        html.includes("Deep Analysis Engine"),
       );
     }
     // React SSR may split "build" and the id with a <!-- --> text-node comment.

@@ -35,4 +35,4 @@ P1 Overview loads with live benchmark stats, no horizontal overflow; P2 Sentinel
 - [x] Update BASETEN_API_KEY
 - [x] Update SENTINELOPS_AUDIT_SIGNING_KEY
 - [x] Fresh migration set + counters schema in the new database
-- [ ] Publish, then run gate against the published URL
+- [x] Publish, then run gate against the published URL

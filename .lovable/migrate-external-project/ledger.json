@@ -60,9 +60,9 @@
     {
       "capability": "published site cutover",
       "source": "original sentielops.lovable.app",
-      "outcome": "new project preview is the replacement",
-      "status": "pending",
-      "next_action": "publish after verification"
+      "outcome": "published; gate 47/47 on live URL",
+      "status": "verified",
+      "next_action": null
     }
   ]
 }

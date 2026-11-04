@@ -138,11 +138,11 @@ describe("rule scoping (zero cross-type false positives)", () => {
         repo.map(async ([name, source]) => [name, (await runSecurityScan(source, name)).findings] as const),
       ),
     );
-    expect(byFile["Dockerfile"].some((f) => f.ruleId === "SEC-005")).toBe(true);
-    expect(byFile["src/legacy.py"].some((f) => f.ruleId === "SEC-007" && f.cwe === "CWE-327")).toBe(
+    expect(byFile["Dockerfile"]!.some((f) => f.ruleId === "SEC-005")).toBe(true);
+    expect(byFile["src/legacy.py"]!.some((f) => f.ruleId === "SEC-007" && f.cwe === "CWE-327")).toBe(
       true,
     );
-    expect(byFile["src/index.js"].some((f) => f.ruleId === "SEC-003")).toBe(true);
-    expect(byFile["package.json"].some((f) => f.ruleId === "SEC-009")).toBe(true);
+    expect(byFile["src/index.js"]!.some((f) => f.ruleId === "SEC-003")).toBe(true);
+    expect(byFile["package.json"]!.some((f) => f.ruleId === "SEC-009")).toBe(true);
   });
 });

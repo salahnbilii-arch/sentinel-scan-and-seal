@@ -17,7 +17,8 @@ const CLEAN_PY = `import os
 API_KEY = os.environ["API_KEY"]
 rows = db.execute("SELECT * FROM users WHERE id = %(id)s", {"id": user_id})`;
 
-const VERIFY_SOURCE = `API_KEY = "sk_live_9f8e7d6c5b4a3210"\nquery = "SELECT * FROM users WHERE id = " + user_id\nresp = requests.get(url, verify=False)\nDEBUG = True`;
+// Exactly one violated obligation (SEC-001): trust must be 100 - 20 x 1 = 80.
+const VERIFY_SOURCE = `API_KEY = "sk_live_9f8e7d6c5b4a3210"`;
 
 const NPM_LOG = `npm ERR! code ERESOLVE
 npm ERR! ERESOLVE could not resolve
@@ -153,7 +154,8 @@ async function main() {
     const html = await res.text();
     const navOk = NAV_LABELS.every((label) => html.includes(label));
     record(`page ${page}: 200, 7-entry sidebar, no AGENTS ONLINE`, res.status === 200 && navOk && !html.includes("AGENTS ONLINE"), `status ${res.status}`);
-    const footerBuild = /build (sentinelops-\d{8}-\d{4}Z)/.exec(html)?.[1];
+    // React SSR may split "build" and the id with a <!-- --> text-node comment.
+    const footerBuild = /build (?:<!-- -->)?(sentinelops-\d{8}-\d{4}Z)/.exec(html)?.[1];
     if (markerOk) record(`page ${page}: footer build marker matches /health`, footerBuild === buildId, `${footerBuild} vs ${buildId}`);
   }
   const gtm = await fetch(`${BASE}/gtm`);

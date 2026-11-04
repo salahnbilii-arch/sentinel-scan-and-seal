@@ -200,7 +200,9 @@ export async function explainFindings(code: string, language: ExplainLanguage = 
     report,
     patchLanguageDirective(code),
   );
-  const out = await callMuse(system, user, report.findings);
+  // Arabic is script-verifiable: an answer without Arabic script is a wrong-language answer.
+  const validate = language === "ar" ? (text: string) => (/[\u0600-\u06FF]/.test(text) ? null : "wrong_language") : undefined;
+  const out = await callMuse(system, user, report.findings, validate);
   return {
     nothingToDo: false as const,
     scanId: report.scanId,

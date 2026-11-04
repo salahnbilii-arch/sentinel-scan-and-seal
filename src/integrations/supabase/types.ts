@@ -14,13 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      api_counters: {
+        Row: {
+          count: number
+          key: string
+          updated_at: string
+        }
+        Insert: {
+          count?: number
+          key: string
+          updated_at?: string
+        }
+        Update: {
+          count?: number
+          key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      api_counters_meta: {
+        Row: {
+          key: string
+          value: string
+        }
+        Insert: {
+          key: string
+          value: string
+        }
+        Update: {
+          key?: string
+          value?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_api_counter: { Args: { p_key: string }; Returns: number }
     }
     Enums: {
       [_ in never]: never

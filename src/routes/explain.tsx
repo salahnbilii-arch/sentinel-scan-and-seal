@@ -91,7 +91,10 @@ function ExplainPage() {
   }
 
   return (
-    <Shell title="Explain Findings" subtitle="Deterministic scan first, then a model explanation in your language">
+    <Shell
+      title="Explain Findings"
+      subtitle="Deterministic scan first, then a model explanation in your language"
+    >
       <div className="grid gap-4 xl:grid-cols-2">
         <section className="panel p-5">
           <div className="flex items-center justify-between">
@@ -120,109 +123,127 @@ function ExplainPage() {
             {busy ? "Working…" : "Scan, then explain"}
           </button>
           <p className="mt-2 text-xs text-muted-foreground">
-            The scan is deterministic. The model is called only when a finding exists; clean code never reaches it.
+            The scan is deterministic. The model is called only when a finding exists; clean code
+            never reaches it.
           </p>
         </section>
 
         <section className="space-y-4">
           <SectionBoundary label="explain-results">
-          {report ? (
-            <div className="panel panel-glow p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="label-mono">Verdict</div>
-                  <div className="mt-1 font-display text-2xl font-semibold uppercase text-primary">{report.verdict}</div>
-                </div>
-                <div className="text-right">
-                  <div className="label-mono">Risk score</div>
-                  <div className="mt-1 font-display text-2xl font-semibold tabular-nums text-critical">
-                    {report.riskScore}/100
+            {report ? (
+              <div className="panel panel-glow p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="label-mono">Verdict</div>
+                    <div className="mt-1 font-display text-2xl font-semibold uppercase text-primary">
+                      {report.verdict}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="label-mono">Risk score</div>
+                    <div className="mt-1 font-display text-2xl font-semibold tabular-nums text-critical">
+                      {report.riskScore}/100
+                    </div>
                   </div>
                 </div>
+                <p className="mt-3 font-mono text-[11px] text-muted-foreground">
+                  scan {report.scanId} · {report.linesAnalyzed} lines · {report.findings.length}{" "}
+                  finding(s)
+                </p>
               </div>
-              <p className="mt-3 font-mono text-[11px] text-muted-foreground">
-                scan {report.scanId} · {report.linesAnalyzed} lines · {report.findings.length} finding(s)
-              </p>
-            </div>
-          ) : null}
+            ) : null}
 
-          {report && report.findings.length > 0 ? (
-            <div className="panel p-5">
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="flex overflow-hidden rounded-md border border-border" role="group" aria-label="Explanation language">
-                  {([["en", "English"], ["ar", "العربية"], ["fr", "Français"]] as const).map(([code, label]) => (
-                    <button
-                      key={code}
-                      onClick={() => void switchLanguage(code)}
-                      disabled={busy}
-                      className={cn(
-                        "px-2.5 py-1.5 text-xs font-medium disabled:opacity-50",
-                        lang === code ? "bg-accent text-accent-foreground" : "hover:bg-surface-raised",
-                      )}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                <span className="font-mono text-[11px] text-muted-foreground">Meta Muse Spark Open</span>
-              </div>
-              {busy && !out ? (
-                <p className="mt-3 text-sm text-muted-foreground">Reasoning…</p>
-              ) : out ? (
-                out.nothingToDo ? (
-                  <p className="mt-3 text-sm text-muted-foreground">{out.message}</p>
-                ) : (
-                  <>
-                    <p className="mt-3 font-mono text-[11px] text-muted-foreground">
-                      Explained by {out.model} · {out.latencyMs} ms
-                    </p>
-                    <pre
-                      dir={lang === "ar" ? "rtl" : "ltr"}
-                      className={cn(
-                        "mt-2 max-h-[420px] overflow-auto whitespace-pre-wrap text-sm text-foreground/90",
-                        lang === "ar" && "text-right",
-                      )}
-                    >
-                      {out.explanation}
-                    </pre>
-                  </>
-                )
-              ) : null}
-            </div>
-          ) : report ? (
-            <div className="panel p-5 text-sm text-muted-foreground">
-              {report.findings.length === 0
-                ? "No rule matched, so there is nothing to explain. The model was not called. This means none of the 12 rules fired, not that the code is proven safe."
-                : null}
-            </div>
-          ) : null}
-
-          {report && report.findings.length > 0 ? (
-            <div className="space-y-3">
-              {report.findings.map((f) => (
-                <article key={f.id} className="panel p-5">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <ShieldAlert className="size-4 text-critical" />
-                    <h3 className="text-sm font-semibold">{f.title}</h3>
-                    <SeverityBadge severity={f.severity} />
-                    <span className="font-mono text-[11px] text-muted-foreground">
-                      {f.cwe} · line {f.line}
-                    </span>
+            {report && report.findings.length > 0 ? (
+              <div className="panel p-5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div
+                    className="flex overflow-hidden rounded-md border border-border"
+                    role="group"
+                    aria-label="Explanation language"
+                  >
+                    {(
+                      [
+                        ["en", "English"],
+                        ["ar", "العربية"],
+                        ["fr", "Français"],
+                      ] as const
+                    ).map(([code, label]) => (
+                      <button
+                        key={code}
+                        onClick={() => void switchLanguage(code)}
+                        disabled={busy}
+                        className={cn(
+                          "px-2.5 py-1.5 text-xs font-medium disabled:opacity-50",
+                          lang === code
+                            ? "bg-accent text-accent-foreground"
+                            : "hover:bg-surface-raised",
+                        )}
+                      >
+                        {label}
+                      </button>
+                    ))}
                   </div>
-                  {f.patch ? (
-                    <pre className="mt-3 overflow-x-auto rounded-md border border-accent/30 bg-accent/5 p-3 font-mono text-xs text-accent">
-                      {f.patch}
-                    </pre>
+                  <span className="font-mono text-[11px] text-muted-foreground">
+                    Meta Muse Spark Open
+                  </span>
+                </div>
+                {busy && !out ? (
+                  <p className="mt-3 text-sm text-muted-foreground">Reasoning…</p>
+                ) : out ? (
+                  out.nothingToDo ? (
+                    <p className="mt-3 text-sm text-muted-foreground">{out.message}</p>
                   ) : (
-                    <p className="mt-3 text-xs text-muted-foreground">
-                      No patch suggestion: the input language could not be determined, so no language-matched patch is
-                      offered.
-                    </p>
-                  )}
-                </article>
-              ))}
-            </div>
-          ) : null}
+                    <>
+                      <p className="mt-3 font-mono text-[11px] text-muted-foreground">
+                        Explained by {out.model} · {out.latencyMs} ms
+                      </p>
+                      <pre
+                        dir={lang === "ar" ? "rtl" : "ltr"}
+                        className={cn(
+                          "mt-2 max-h-[420px] overflow-auto whitespace-pre-wrap text-sm text-foreground/90",
+                          lang === "ar" && "text-right",
+                        )}
+                      >
+                        {out.explanation}
+                      </pre>
+                    </>
+                  )
+                ) : null}
+              </div>
+            ) : report ? (
+              <div className="panel p-5 text-sm text-muted-foreground">
+                {report.findings.length === 0
+                  ? "No rule matched, so there is nothing to explain. The model was not called. This means none of the 12 rules fired, not that the code is proven safe."
+                  : null}
+              </div>
+            ) : null}
+
+            {report && report.findings.length > 0 ? (
+              <div className="space-y-3">
+                {report.findings.map((f) => (
+                  <article key={f.id} className="panel p-5">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <ShieldAlert className="size-4 text-critical" />
+                      <h3 className="text-sm font-semibold">{f.title}</h3>
+                      <SeverityBadge severity={f.severity} />
+                      <span className="font-mono text-[11px] text-muted-foreground">
+                        {f.cwe} · line {f.line}
+                      </span>
+                    </div>
+                    {f.patch ? (
+                      <pre className="mt-3 overflow-x-auto rounded-md border border-accent/30 bg-accent/5 p-3 font-mono text-xs text-accent">
+                        {f.patch}
+                      </pre>
+                    ) : (
+                      <p className="mt-3 text-xs text-muted-foreground">
+                        No patch suggestion: the input language could not be determined, so no
+                        language-matched patch is offered.
+                      </p>
+                    )}
+                  </article>
+                ))}
+              </div>
+            ) : null}
           </SectionBoundary>
         </section>
       </div>

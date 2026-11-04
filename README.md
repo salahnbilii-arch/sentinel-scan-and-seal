@@ -11,13 +11,13 @@ output. Built for EU regulatory scrutiny (GDPR, Cyber Resilience Act, NIS2).
 
 ## 1. Architecture
 
-| Layer | Technology |
-| --- | --- |
-| UI | React 19 + TanStack Router (file-based routing) + Tailwind CSS v4 design system |
-| Server | TanStack Start server functions + server routes |
-| Agent engine | `src/lib/agents.server.ts` — scanner rules and healer signatures (deterministic) |
+| Layer        | Technology                                                                                  |
+| ------------ | ------------------------------------------------------------------------------------------- |
+| UI           | React 19 + TanStack Router (file-based routing) + Tailwind CSS v4 design system             |
+| Server       | TanStack Start server functions + server routes                                             |
+| Agent engine | `src/lib/agents.server.ts` — scanner rules and healer signatures (deterministic)            |
 | Verification | `src/lib/verify.server.ts` — 5 heuristic obligations, SHA-256 digest, HMAC-SHA256 signature |
-| Model | `src/lib/meta.server.ts` — Muse Spark Open via Baseten (the only model; no fallback) |
+| Model        | `src/lib/meta.server.ts` — Muse Spark Open via Baseten (the only model; no fallback)        |
 
 ```
 src/
@@ -44,49 +44,61 @@ src/
 Base URL: `https://<your-deployment>/api/public/v1`
 
 ### `POST /scan-code`
+
 ```json
 { "code": "API_KEY = \"sk_live_...\"", "filename": "settings.py" }
 ```
+
 Returns `scanId`, `verdict` (`blocked|review|clean`), `riskScore` (0–100), severity `counts`,
 and a `findings[]` array with `cwe`, `line`, `evidence`, `remediation`, a ready-to-apply
 `patch` and mapped `compliance` references.
 
 ### `POST /devops-heal`
+
 ```json
 { "log": "npm ERR! code ERESOLVE ..." }
 ```
+
 Returns `detected`, `rootCause`, `targetFile`, the corrected `patch`, recovery `commands[]`
 and `preventions[]`. `signatureScore` is a fixed per-signature constant, not a measured accuracy.
 
 ### `POST /explain` and `POST /deep-analysis`
+
 ```json
 { "code": "..." }
 ```
+
 Both re-scan server-side first. Clean input returns `200 { "nothingToDo": true }` and never
 calls the model. The model prompt contains only scanner facts and findings; answers that cite
 a rule or CWE the scanner did not produce are retried once, then rejected
 (`model_output_rejected`).
 
 ### `POST /verify`
+
 ```json
 { "source": "...", "artifactName": "settings.py" }
 ```
+
 Runs the same scanner, discharges 5 heuristic obligations and returns a signed artifact:
 `trustScore = 100 - 20 x violatedCount` (`trustFormula` included), the findings embedded in
 the digest, a SHA-256 `digest` and an `HMAC-SHA256` `signature` (`SENTINELOPS_AUDIT_SIGNING_KEY`).
 This is a heuristic audit record — there is no formal proof and no solver.
 
 ### `POST /check-signature`
+
 ```json
 { "artifact": { ...signed artifact... } }
 ```
+
 Strict shape validation (400 on malformed input), then recomputes digest and signature.
 
 ### `GET /benchmark`
+
 Live detection numbers computed from the bundled samples: 12 vulnerable samples (one per rule)
 and 8 clean samples. Includes the per-rule CWE.
 
 ### `GET /rules`
+
 The 12-rule catalog with titles, severities, categories and the CWE mapping.
 
 All endpoints validate input, cap payloads at 120 KB, require a JSON object body and send

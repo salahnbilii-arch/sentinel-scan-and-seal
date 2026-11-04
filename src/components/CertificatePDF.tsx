@@ -70,7 +70,9 @@ function RecordMark() {
         <div className="font-serif text-[11px] font-semibold uppercase tracking-[0.16em] text-cert-navy">
           Signed
         </div>
-        <div className="mt-1 text-[8px] uppercase tracking-[0.2em] text-cert-slate">Digest · HMAC</div>
+        <div className="mt-1 text-[8px] uppercase tracking-[0.2em] text-cert-slate">
+          Digest · HMAC
+        </div>
       </div>
     </div>
   );
@@ -126,8 +128,7 @@ export function CertificatePDF({ data, className }: { data: CertificateData; cla
               cryptographic. There is no formal proof and no solver.
             </p>
             <p className="mt-3 font-serif text-base font-semibold text-cert-navy sm:text-lg">
-              Trust Score:{" "}
-              <span className="tabular-nums">{Math.round(data.trustScore)}</span>
+              Trust Score: <span className="tabular-nums">{Math.round(data.trustScore)}</span>
               <span className="text-cert-slate">/100</span>
             </p>
             <p className="mt-1 text-[9.5px] uppercase tracking-[0.14em] text-cert-slate">
@@ -139,7 +140,9 @@ export function CertificatePDF({ data, className }: { data: CertificateData; cla
           <section className="mt-5 sm:mt-6">
             <dl className="grid gap-x-8 gap-y-2 break-all font-mono text-[11px] sm:grid-cols-2">
               <div>
-                <dt className="inline uppercase tracking-[0.12em] text-cert-slate">Verification ID (digest prefix): </dt>
+                <dt className="inline uppercase tracking-[0.12em] text-cert-slate">
+                  Verification ID (digest prefix):{" "}
+                </dt>
                 <dd className="inline font-semibold text-cert-navy">{verificationId}</dd>
               </div>
               <div>
@@ -147,11 +150,15 @@ export function CertificatePDF({ data, className }: { data: CertificateData; cla
                 <dd className="inline font-semibold text-cert-navy">{data.scanId}</dd>
               </div>
               <div className="sm:col-span-2">
-                <dt className="inline uppercase tracking-[0.12em] text-cert-slate">Artifact digest (SHA-256): </dt>
+                <dt className="inline uppercase tracking-[0.12em] text-cert-slate">
+                  Artifact digest (SHA-256):{" "}
+                </dt>
                 <dd className="inline font-semibold text-cert-navy">{data.digest}</dd>
               </div>
               <div className="sm:col-span-2">
-                <dt className="inline uppercase tracking-[0.12em] text-cert-slate">{data.signatureAlgorithm} signature: </dt>
+                <dt className="inline uppercase tracking-[0.12em] text-cert-slate">
+                  {data.signatureAlgorithm} signature:{" "}
+                </dt>
                 <dd className="inline font-semibold text-cert-navy">{data.signature}</dd>
               </div>
             </dl>

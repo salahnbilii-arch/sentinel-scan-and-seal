@@ -29,15 +29,22 @@ function publishableClient() {
   const url = process.env["SUPABASE_URL"];
   const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
   if (!url || !key) {
-    throw new HttpError(503, "counters_unavailable", "Counters storage is not configured on the server.");
+    throw new HttpError(
+      503,
+      "counters_unavailable",
+      "Counters storage is not configured on the server.",
+    );
   }
   return createClient<Database>(url, key, {
     global: {
       fetch: (input, init) => {
-        const headers = new Headers(typeof Request !== "undefined" && input instanceof Request ? input.headers : undefined);
+        const headers = new Headers(
+          typeof Request !== "undefined" && input instanceof Request ? input.headers : undefined,
+        );
         if (init?.headers) new Headers(init.headers).forEach((v, k) => headers.set(k, v));
         // Opaque publishable keys are not bearer JWTs: send them as apikey only.
-        if (key.startsWith("sb_") && headers.get("Authorization") === `Bearer ${key}`) headers.delete("Authorization");
+        if (key.startsWith("sb_") && headers.get("Authorization") === `Bearer ${key}`)
+          headers.delete("Authorization");
         headers.set("apikey", key);
         return fetch(input, { ...init, headers });
       },
@@ -53,7 +60,10 @@ export async function recordCounter(key: CounterKey): Promise<void> {
     const { error } = await supabaseAdmin.rpc("increment_api_counter", { p_key: key });
     if (error) throw error;
   } catch (error) {
-    console.error(`[metrics] failed to record "${key}":`, error instanceof Error ? error.message : error);
+    console.error(
+      `[metrics] failed to record "${key}":`,
+      error instanceof Error ? error.message : error,
+    );
   }
 }
 

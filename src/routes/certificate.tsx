@@ -44,7 +44,9 @@ function CertificatePage() {
 
   let content: ReactNode;
   if (!ready) {
-    content = <div className="panel p-5 text-sm text-muted-foreground">Checking for a verification…</div>;
+    content = (
+      <div className="panel p-5 text-sm text-muted-foreground">Checking for a verification…</div>
+    );
   } else if (!art) {
     // No Verify run → ONLY this gate. No form, no PDF button.
     content = (
@@ -107,9 +109,7 @@ function CertificatePage() {
       title="Compliance Certificate"
       subtitle="Audit-record certificate generated from a real Verify run · nothing invented"
     >
-      <SectionBoundary label="certificate">
-        {content}
-      </SectionBoundary>
+      <SectionBoundary label="certificate">{content}</SectionBoundary>
     </Shell>
   );
 }

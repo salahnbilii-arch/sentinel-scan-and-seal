@@ -21,7 +21,11 @@ export const Route = createFileRoute("/repo")({
           "Paste a public github.com URL and scan up to 50 code and manifest files (120KB each) with an aggregate gate verdict.",
       },
       { property: "og:title", content: "Public Repo Scan" },
-      { property: "og:description", content: "Scan a public GitHub repository with the 12 SentinelOps rules and get a gate verdict." },
+      {
+        property: "og:description",
+        content:
+          "Scan a public GitHub repository with the 12 SentinelOps rules and get a gate verdict.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -47,7 +51,9 @@ function RepoScanPage() {
     try {
       setResult(await run({ data: { url } }));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "The repository scan could not complete. Try again.");
+      setError(
+        e instanceof Error ? e.message : "The repository scan could not complete. Try again.",
+      );
     } finally {
       setBusy(false);
     }
@@ -79,11 +85,13 @@ function RepoScanPage() {
           {busy ? "Scanning repository…" : "Scan repository"}
         </button>
         <p className="mt-2 text-xs text-muted-foreground">
-          Public repositories only. Private or missing repositories, oversized repositories and bad URLs fail with a
-          clear message — nothing is guessed or faked.
+          Public repositories only. Private or missing repositories, oversized repositories and bad
+          URLs fail with a clear message — nothing is guessed or faked.
         </p>
         {error ? (
-          <p className="mt-3 rounded-md border border-critical/40 bg-critical/10 p-3 text-sm text-critical">{error}</p>
+          <p className="mt-3 rounded-md border border-critical/40 bg-critical/10 p-3 text-sm text-critical">
+            {error}
+          </p>
         ) : null}
       </section>
 
@@ -104,7 +112,11 @@ function RepoReport({ result }: { result: RepoScanResult }) {
             <div
               className={cn(
                 "mt-1 font-display text-2xl font-semibold uppercase",
-                result.gateVerdict === "blocked" ? "text-critical" : result.gateVerdict === "review" ? "text-high" : "text-accent",
+                result.gateVerdict === "blocked"
+                  ? "text-critical"
+                  : result.gateVerdict === "review"
+                    ? "text-high"
+                    : "text-accent",
               )}
             >
               {result.gateVerdict}
@@ -118,15 +130,18 @@ function RepoReport({ result }: { result: RepoScanResult }) {
         </div>
         <div className="mt-4 grid grid-cols-4 gap-2 font-mono text-xs">
           {(["critical", "high", "medium", "low"] as const).map((s) => (
-            <div key={s} className="rounded-md border border-border bg-surface-raised p-2 text-center">
+            <div
+              key={s}
+              className="rounded-md border border-border bg-surface-raised p-2 text-center"
+            >
               <div className="text-lg tabular-nums text-foreground">{result.totals[s]}</div>
               <div className="uppercase tracking-widest text-muted-foreground">{s}</div>
             </div>
           ))}
         </div>
         <p className="mt-3 text-sm text-muted-foreground">
-          {result.totals.findings} finding(s) across {result.totals.filesWithFindings} file(s). BLOCKED means at least
-          one critical finding.
+          {result.totals.findings} finding(s) across {result.totals.filesWithFindings} file(s).
+          BLOCKED means at least one critical finding.
         </p>
         {result.notes.length ? (
           <ul className="mt-3 space-y-1 font-mono text-[11px] text-muted-foreground">
@@ -163,9 +178,17 @@ function RepoFileCard({ file }: { file: RepoScanResult["files"][number] }) {
       ) : (
         <ul className="mt-3 space-y-3">
           {file.findings.map((finding) => (
-            <li key={finding.id} className="rounded-md border border-border bg-surface-raised/50 p-3">
+            <li
+              key={finding.id}
+              className="rounded-md border border-border bg-surface-raised/50 p-3"
+            >
               <div className="flex flex-wrap items-center gap-2">
-                <ShieldAlert className={cn("size-4", finding.severity === "critical" ? "text-critical" : "text-high")} />
+                <ShieldAlert
+                  className={cn(
+                    "size-4",
+                    finding.severity === "critical" ? "text-critical" : "text-high",
+                  )}
+                />
                 <span className="text-sm font-medium">{finding.title}</span>
                 <SeverityBadge severity={finding.severity} />
                 <span className="font-mono text-[11px] text-muted-foreground">

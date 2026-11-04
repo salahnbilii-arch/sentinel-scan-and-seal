@@ -142,12 +142,20 @@ function HealerPage() {
                 </h3>
                 <p className="mt-2 text-sm text-muted-foreground">{result.rootCause}</p>
                 <div className="mt-3 flex flex-wrap gap-2 font-mono text-[11px] text-muted-foreground">
-                  <span className="rounded border border-border px-2 py-0.5">{result.category}</span>
+                  <span className="rounded border border-border px-2 py-0.5">
+                    {result.category}
+                  </span>
                   <span className="rounded border border-border px-2 py-0.5">
                     signature score {result.signatureScore} (fixed constant)
                   </span>
-                  <span className="rounded border border-border px-2 py-0.5">{result.incidentId}</span>
-                  {!result.matchedSignature ? <span className="rounded border border-medium/50 px-2 py-0.5 text-medium">generic fallback</span> : null}
+                  <span className="rounded border border-border px-2 py-0.5">
+                    {result.incidentId}
+                  </span>
+                  {!result.matchedSignature ? (
+                    <span className="rounded border border-medium/50 px-2 py-0.5 text-medium">
+                      generic fallback
+                    </span>
+                  ) : null}
                 </div>
               </div>
             ) : null}

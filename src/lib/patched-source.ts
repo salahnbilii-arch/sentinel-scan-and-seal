@@ -5,7 +5,10 @@ import type { ScanReport } from "./agents.server";
  * Nothing is invented here: the replacement text is exactly what the findings cards offer.
  * When several findings hit the same line, the first patch wins (deterministic report order).
  */
-export function buildPatchedSource(source: string, report: Pick<ScanReport, "findings">): { code: string; applied: number } {
+export function buildPatchedSource(
+  source: string,
+  report: Pick<ScanReport, "findings">,
+): { code: string; applied: number } {
   const byLine = new Map<number, string>();
   for (const f of report.findings) {
     if (f.patch && !byLine.has(f.line)) byLine.set(f.line, f.patch);

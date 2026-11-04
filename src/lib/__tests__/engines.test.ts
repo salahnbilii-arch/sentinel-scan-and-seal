@@ -42,7 +42,9 @@ describe("scanner (reference rules)", () => {
 
   it("caps risk at 100", async () => {
     const r = await runSecurityScan(
-      Array(6).fill(`password = "hunter2hunter"`).join("\n") + "\n" + Array(3).fill(`token = "abcdefgh"`).join("\n"),
+      Array(6).fill(`password = "hunter2hunter"`).join("\n") +
+        "\n" +
+        Array(3).fill(`token = "abcdefgh"`).join("\n"),
     );
     expect(r.riskScore).toBeLessThanOrEqual(100);
   });
@@ -65,7 +67,16 @@ describe("scanner (reference rules)", () => {
       expect(r.findings.find((f) => f.ruleId === "SEC-003")?.cwe).toBe(cwe);
     }
     // safe usage must not fire
-    expect((await runSecurityScan("re.exec(s)")).findings.some((f) => f.ruleId === "SEC-003")).toBe(false);
+    expect((await runSecurityScan("re.exec(s)")).findings.some((f) => f.ruleId === "SEC-003")).toBe(
+      false,
+    );
+  });
+
+  it("catalog exposes every CWE the rule can fire with (SEC-003 alias)", () => {
+    const sec003 = ruleCatalog().find((r) => r.id === "SEC-003");
+    expect(sec003?.cwe).toBe("CWE-95");
+    expect(sec003?.cweAliases).toContain("CWE-78");
+    expect(ruleCatalog().find((r) => r.id === "SEC-001")?.cweAliases).toBeUndefined();
   });
 
   it("every finding carries the CWE of its rule (SEC-003 per pattern)", async () => {
@@ -154,12 +165,17 @@ describe("meta output guard", () => {
 
   it("rejects SEC/CWE ids the scanner did not produce", async () => {
     const findings = (await runSecurityScan(SRC)).findings;
-    expect(citationProblems("Also SEC-009 and CWE-999 apply.", findings)).toEqual(["SEC-009", "CWE-999"]);
+    expect(citationProblems("Also SEC-009 and CWE-999 apply.", findings)).toEqual([
+      "SEC-009",
+      "CWE-999",
+    ]);
   });
 
   it("accepts ids the scanner did produce", async () => {
     const findings = (await runSecurityScan(SRC)).findings;
-    expect(citationProblems("SEC-001, SEC-003, CWE-798 and CWE-78 are real.", findings)).toEqual([]);
+    expect(citationProblems("SEC-001, SEC-003, CWE-798 and CWE-78 are real.", findings)).toEqual(
+      [],
+    );
   });
 });
 
@@ -168,11 +184,15 @@ describe("explain patch language", () => {
     expect(detectLanguage('API_KEY = "sk_live_9f8e7d6c5b4a3210"\nDEBUG = True')).toBe("python");
     expect(detectLanguage('const cp = require("child_process");\nconst t = 1;')).toBe("javascript");
     expect(detectLanguage("SELECT * FROM users WHERE id = 1")).toBe("unknown");
+    // terse one-liners: arrow with expression body must still read as JavaScript
+    expect(detectLanguage("const handler = (input) => eval(input);")).toBe("javascript");
   });
 
   it("Python input → Python patch rule; unknown → no Patch section", () => {
     expect(patchLanguageDirective("DEBUG = True")).toMatch(/the input source is Python/);
-    expect(patchLanguageDirective("DEBUG = True")).toMatch(/Never show a patch in a different language/);
+    expect(patchLanguageDirective("DEBUG = True")).toMatch(
+      /Never show a patch in a different language/,
+    );
     expect(patchLanguageDirective("SELECT * FROM users WHERE id = 1")).toMatch(
       /Omit the ## Patch section entirely/,
     );
@@ -181,7 +201,9 @@ describe("explain patch language", () => {
 
 describe("scan patch language (findings cards)", () => {
   it("Python input → Python patches", async () => {
-    const r = await runSecurityScan('import os\nAPI_KEY = "sk_live_9f8e7d6c5b4a3210"\nos.system(cmd)\nDEBUG = True');
+    const r = await runSecurityScan(
+      'import os\nAPI_KEY = "sk_live_9f8e7d6c5b4a3210"\nos.system(cmd)\nDEBUG = True',
+    );
     const sec1 = r.findings.find((f) => f.ruleId === "SEC-001");
     expect(sec1?.patch).toContain('os.environ["API_KEY"]');
     expect(sec1?.patch).not.toContain("process.env");
@@ -201,6 +223,15 @@ describe("scan patch language (findings cards)", () => {
     const sec3 = r.findings.find((f) => f.ruleId === "SEC-003");
     expect(sec3?.patch).toContain("as const");
     expect(r.findings.find((f) => f.ruleId === "SEC-007")?.patch).toContain("scryptSync");
+  });
+
+  it("terse JS one-liner → JavaScript patch on SEC-003", async () => {
+    const r = await runSecurityScan("const handler = (input) => eval(input);");
+    const sec3 = r.findings.find((f) => f.ruleId === "SEC-003");
+    expect(sec3?.cwe).toBe("CWE-95");
+    // a JavaScript patch is offered (dispatch table), never a Python one
+    expect(sec3?.patch ?? "").not.toMatch(/def |os\.|subprocess/);
+    expect(sec3?.patch ?? "").toMatch(/as const|=>|function/);
   });
 
   it("Unknown language → no patch for language-tied rules", async () => {
@@ -264,7 +295,12 @@ describe("evidence pack", () => {
 describe("public repo scan", () => {
   it("rejects bad URLs and non-github hosts before any network call", async () => {
     const { parseRepoUrl, scanGithubRepo } = await import("../repo.server");
-    for (const bad of ["not a url", "https://gitlab.com/a/b", "http://github.com/a/b", "https://github.com/onlyowner"]) {
+    for (const bad of [
+      "not a url",
+      "https://gitlab.com/a/b",
+      "http://github.com/a/b",
+      "https://github.com/onlyowner",
+    ]) {
       await expect(scanGithubRepo(bad)).rejects.toMatchObject({ status: 400 });
     }
     expect(parseRepoUrl("https://github.com/owner/repo/tree/v2.0.0/src")).toEqual({
@@ -276,7 +312,9 @@ describe("public repo scan", () => {
 
   it("fails gracefully on a missing or private repository", async () => {
     const { scanGithubRepo } = await import("../repo.server");
-    await expect(scanGithubRepo("https://github.com/octocat/this-repo-does-not-exist-4x9k")).rejects.toMatchObject({
+    await expect(
+      scanGithubRepo("https://github.com/octocat/this-repo-does-not-exist-4x9k"),
+    ).rejects.toMatchObject({
       status: 404,
       code: "repo_not_found",
     });

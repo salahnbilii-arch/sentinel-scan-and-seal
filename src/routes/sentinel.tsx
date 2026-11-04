@@ -82,7 +82,9 @@ function SentinelPage() {
     if (!report) return;
     const { code: patched, applied } = buildPatchedSource(code, report);
     if (!applied) {
-      toast.error("No patch suggestions are available for this report, so there is nothing to re-scan.");
+      toast.error(
+        "No patch suggestions are available for this report, so there is nothing to re-scan.",
+      );
       return;
     }
     setRescanBusy(true);
@@ -148,7 +150,8 @@ function SentinelPage() {
           <SectionBoundary label="sentinel-findings">
             {report.findings.length === 0 ? (
               <div className="panel p-5 text-sm text-muted-foreground">
-                No rule matched. This means none of the 12 rules fired, not that the code is proven safe.
+                No rule matched. This means none of the 12 rules fired, not that the code is proven
+                safe.
               </div>
             ) : (
               report.findings.map((f) => <FindingCard key={f.id} finding={f} />)
@@ -163,8 +166,8 @@ function SentinelPage() {
             <div className="min-w-0">
               <h2 className="text-base font-semibold">Re-scan patched code</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Applies each patch suggestion above to its own line — the replacement text is exactly what the cards
-                offer — then runs the scanner over the result.
+                Applies each patch suggestion above to its own line — the replacement text is
+                exactly what the cards offer — then runs the scanner over the result.
               </p>
             </div>
             <button
@@ -190,7 +193,9 @@ function SentinelPage() {
                   {patchedReport.findings.length} finding(s) remain.
                 </p>
                 {patchedReport.findings.length > 0 ? (
-                  patchedReport.findings.map((f) => <FindingCard key={`patched-${f.id}`} finding={f} />)
+                  patchedReport.findings.map((f) => (
+                    <FindingCard key={`patched-${f.id}`} finding={f} />
+                  ))
                 ) : (
                   <p className="text-sm font-medium text-accent">
                     The patched code is clean: no rule fires any more.
@@ -224,7 +229,10 @@ function Verdict({ report }: { report: ScanReport }) {
       </div>
       <div className="mt-4 grid grid-cols-4 gap-2 font-mono text-xs">
         {(["critical", "high", "medium", "low"] as const).map((s) => (
-          <div key={s} className="rounded-md border border-border bg-surface-raised p-2 text-center">
+          <div
+            key={s}
+            className="rounded-md border border-border bg-surface-raised p-2 text-center"
+          >
             <div className="text-lg tabular-nums text-foreground">{report.counts[s]}</div>
             <div className="uppercase tracking-widest text-muted-foreground">{s}</div>
           </div>
@@ -264,7 +272,8 @@ function FindingCard({ finding }: { finding: ScanReport["findings"][number] }) {
         </pre>
       ) : (
         <p className="mt-3 text-xs text-muted-foreground">
-          No patch suggestion: the input language could not be determined, so no language-matched patch is offered.
+          No patch suggestion: the input language could not be determined, so no language-matched
+          patch is offered.
         </p>
       )}
       <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -304,7 +313,9 @@ function Explain({ code }: { code: string }) {
     try {
       setOut(await run({ data: { code, language: next } }));
     } catch (error) {
-      toast.error("Explanation failed", { description: error instanceof Error ? error.message : undefined });
+      toast.error("Explanation failed", {
+        description: error instanceof Error ? error.message : undefined,
+      });
     } finally {
       setBusy(false);
     }
@@ -312,16 +323,33 @@ function Explain({ code }: { code: string }) {
   return (
     <div className="panel p-5">
       <div className="flex flex-wrap items-center gap-2">
-        <button onClick={() => void go(lang)} disabled={busy} className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-50">
+        <button
+          onClick={() => void go(lang)}
+          disabled={busy}
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-50"
+        >
           <Sparkle className="size-3.5" /> {busy ? "Reasoning…" : "Explain findings"}
         </button>
-        <div className="flex overflow-hidden rounded-md border border-border" role="group" aria-label="Explanation language">
-          {([["en", "English"], ["ar", "العربية"], ["fr", "Français"]] as const).map(([code, label]) => (
+        <div
+          className="flex overflow-hidden rounded-md border border-border"
+          role="group"
+          aria-label="Explanation language"
+        >
+          {(
+            [
+              ["en", "English"],
+              ["ar", "العربية"],
+              ["fr", "Français"],
+            ] as const
+          ).map(([code, label]) => (
             <button
               key={code}
               onClick={() => void go(code)}
               disabled={busy}
-              className={cn("px-2.5 py-1.5 text-xs font-medium disabled:opacity-50", lang === code ? "bg-accent text-accent-foreground" : "hover:bg-surface-raised")}
+              className={cn(
+                "px-2.5 py-1.5 text-xs font-medium disabled:opacity-50",
+                lang === code ? "bg-accent text-accent-foreground" : "hover:bg-surface-raised",
+              )}
             >
               {label}
             </button>
@@ -334,8 +362,18 @@ function Explain({ code }: { code: string }) {
           <p className="mt-3 text-sm text-muted-foreground">{out.message}</p>
         ) : (
           <>
-            <p className="mt-3 font-mono text-[11px] text-muted-foreground">Explained by {out.model} · {out.latencyMs} ms</p>
-            <pre dir={lang === "ar" ? "rtl" : "ltr"} className={cn("mt-2 max-h-[420px] overflow-auto whitespace-pre-wrap text-sm text-foreground/90", lang === "ar" && "text-right")}>{out.explanation}</pre>
+            <p className="mt-3 font-mono text-[11px] text-muted-foreground">
+              Explained by {out.model} · {out.latencyMs} ms
+            </p>
+            <pre
+              dir={lang === "ar" ? "rtl" : "ltr"}
+              className={cn(
+                "mt-2 max-h-[420px] overflow-auto whitespace-pre-wrap text-sm text-foreground/90",
+                lang === "ar" && "text-right",
+              )}
+            >
+              {out.explanation}
+            </pre>
           </>
         )
       ) : null}

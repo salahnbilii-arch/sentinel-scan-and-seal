@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 const run = async ({ request }: { request: Request }) => {
-  const { handleApi, requireText, optionalText, MAX_ARTIFACT_CHARS } = await import("@/lib/api-helpers.server");
+  const { handleApi, requireText, optionalText, MAX_ARTIFACT_CHARS } =
+    await import("@/lib/api-helpers.server");
   const { runVerification } = await import("@/lib/verify.server");
   return handleApi(request, async (body) => {
     const artifact = await runVerification(

@@ -82,8 +82,16 @@ function CompliancePage() {
           {[
             ["POST", "/api/public/v1/scan-code", "{ code, filename? } → severity report + patches"],
             ["POST", "/api/public/v1/devops-heal", "{ log } → root cause + configuration patch"],
-            ["POST", "/api/public/v1/explain", "{ code } → Muse Spark Open explanation; clean input → { nothingToDo: true }"],
-            ["POST", "/api/public/v1/deep-analysis", "{ content } → deep audit report; clean input → { nothingToDo: true }"],
+            [
+              "POST",
+              "/api/public/v1/explain",
+              "{ code } → Muse Spark Open explanation; clean input → { nothingToDo: true }",
+            ],
+            [
+              "POST",
+              "/api/public/v1/deep-analysis",
+              "{ content } → deep audit report; clean input → { nothingToDo: true }",
+            ],
             ["POST", "/api/public/v1/verify", "{ source, artifactName? } → signed artifact"],
             ["POST", "/api/public/v1/check-signature", "{ artifact } → digest + signature check"],
             ["GET", "/api/public/v1/benchmark", "→ detection and false-positive numbers"],

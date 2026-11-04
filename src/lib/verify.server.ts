@@ -1,4 +1,3 @@
-
 import { HttpError } from "./api-helpers.server";
 import { runSecurityScan, sha256, type Severity } from "./agents.server";
 
@@ -11,10 +10,22 @@ import { runSecurityScan, sha256, type Severity } from "./agents.server";
  */
 export const OBLIGATIONS = [
   { id: "OB-1", statement: "No hardcoded credentials", rules: ["SEC-001"] },
-  { id: "OB-2", statement: "No injection sinks (SQL, dynamic code)", rules: ["SEC-002", "SEC-003"] },
+  {
+    id: "OB-2",
+    statement: "No injection sinks (SQL, dynamic code)",
+    rules: ["SEC-002", "SEC-003"],
+  },
   { id: "OB-3", statement: "Transport and cryptography hygiene", rules: ["SEC-004", "SEC-007"] },
-  { id: "OB-4", statement: "Access control and runtime hardening", rules: ["SEC-005", "SEC-006", "SEC-011", "SEC-012"] },
-  { id: "OB-5", statement: "Privacy and configuration hygiene", rules: ["SEC-008", "SEC-009", "SEC-010"] },
+  {
+    id: "OB-4",
+    statement: "Access control and runtime hardening",
+    rules: ["SEC-005", "SEC-006", "SEC-011", "SEC-012"],
+  },
+  {
+    id: "OB-5",
+    statement: "Privacy and configuration hygiene",
+    rules: ["SEC-008", "SEC-009", "SEC-010"],
+  },
 ] as const;
 
 export const SIGNATURE_ALGORITHM = "HMAC-SHA256";
@@ -82,7 +93,10 @@ async function sign(digest: string, key: string): Promise<string> {
     .join("");
 }
 
-type Core = Pick<SignedArtifact, "artifactName" | "sourceSha256" | "verdict" | "riskScore" | "findings" | "obligations">;
+type Core = Pick<
+  SignedArtifact,
+  "artifactName" | "sourceSha256" | "verdict" | "riskScore" | "findings" | "obligations"
+>;
 
 /** Canonical payload that the digest covers (stable key order). */
 function canonical(a: Core): string {
@@ -104,7 +118,10 @@ function timingSafeEqualHex(a: string, b: string): boolean {
   return diff === 0;
 }
 
-export async function runVerification(source: string, artifactName = "artifact.txt"): Promise<SignedArtifact> {
+export async function runVerification(
+  source: string,
+  artifactName = "artifact.txt",
+): Promise<SignedArtifact> {
   const key = signingKey(); // fail early and gracefully when unset
   const scan = await runSecurityScan(source, artifactName);
   const fired = new Set(scan.findings.map((f) => f.ruleId));
@@ -154,16 +171,30 @@ const isStr = (v: unknown): v is string => typeof v === "string";
 
 /** Strict shape check so a malformed artifact is a 400, never a crash. */
 export function parseArtifact(v: unknown): SignedArtifact {
-  const bad = () => new HttpError(400, "invalid_input", '"artifact" is not a SentinelOps signed artifact.');
+  const bad = () =>
+    new HttpError(400, "invalid_input", '"artifact" is not a SentinelOps signed artifact.');
   if (!v || typeof v !== "object" || Array.isArray(v)) throw bad();
   const a = v as Record<string, unknown>;
-  if (![a["artifactName"], a["sourceSha256"], a["verdict"], a["digest"], a["signature"]].every(isStr)) throw bad();
-  if (typeof a["riskScore"] !== "number" || !Array.isArray(a["findings"]) || !Array.isArray(a["obligations"])) throw bad();
+  if (
+    ![a["artifactName"], a["sourceSha256"], a["verdict"], a["digest"], a["signature"]].every(isStr)
+  )
+    throw bad();
+  if (
+    typeof a["riskScore"] !== "number" ||
+    !Array.isArray(a["findings"]) ||
+    !Array.isArray(a["obligations"])
+  )
+    throw bad();
   const okF = (a["findings"] as unknown[]).every(
     (f) =>
       !!f &&
       typeof f === "object" &&
-      [(f as Record<string, unknown>)["id"], (f as Record<string, unknown>)["ruleId"], (f as Record<string, unknown>)["cwe"], (f as Record<string, unknown>)["severity"]].every(isStr) &&
+      [
+        (f as Record<string, unknown>)["id"],
+        (f as Record<string, unknown>)["ruleId"],
+        (f as Record<string, unknown>)["cwe"],
+        (f as Record<string, unknown>)["severity"],
+      ].every(isStr) &&
       typeof (f as Record<string, unknown>)["line"] === "number",
   );
   const okO = (a["obligations"] as unknown[]).every(
@@ -180,7 +211,9 @@ export function parseArtifact(v: unknown): SignedArtifact {
 }
 
 /** Recompute digest and HMAC for a previously issued artifact. */
-export async function checkSignature(a: SignedArtifact): Promise<{ digestMatches: boolean; signatureValid: boolean }> {
+export async function checkSignature(
+  a: SignedArtifact,
+): Promise<{ digestMatches: boolean; signatureValid: boolean }> {
   const key = signingKey();
   const digestMatches = (await sha256(canonical(a))) === a.digest;
   const expected = await sign(a.digest, key);

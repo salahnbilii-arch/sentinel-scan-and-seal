@@ -10,7 +10,10 @@ export default defineTool({
     "Scan an artifact, run 5 heuristic obligation checks, and return a SHA-256 digest with an HMAC-SHA256 signature. Heuristic checks, not a formal proof.",
   inputSchema: {
     source: z.string().min(1).describe("Raw source code or configuration to verify."),
-    artifactName: z.string().optional().describe("Optional artifact name recorded in the signed result."),
+    artifactName: z
+      .string()
+      .optional()
+      .describe("Optional artifact name recorded in the signed result."),
   },
   annotations: { readOnlyHint: true, idempotentHint: false, openWorldHint: false },
   handler: async ({ source, artifactName }, ctx) => {
@@ -18,6 +21,9 @@ export default defineTool({
       return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     }
     const artifact = await runVerification(source, artifactName ?? "artifact.txt");
-    return { content: [{ type: "text", text: JSON.stringify(artifact, null, 2) }], structuredContent: { artifact } };
+    return {
+      content: [{ type: "text", text: JSON.stringify(artifact, null, 2) }],
+      structuredContent: { artifact },
+    };
   },
 });

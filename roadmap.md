@@ -20,6 +20,7 @@
 
 Phone test suite (run after each feature, 384x652 viewport):
 P1 Overview loads with live benchmark stats, no horizontal overflow; P2 Sentinel default-sample scan completes with verdict; P3 findings show language-matched patches; P4 unknown-language input hides the patch block and Copy button; P5 Healer npm-log run returns the 0.94 signature; P6 Verify returns trust = 100 − 20 × violated with digest; P7 Verify Re-check passes; P8 Certificate gate without a run, renders with one; P9 Compliance loads and /gtm is gone.
+
 - [x] Secrets after remix: update BASETEN_API_KEY and SENTINELOPS_AUDIT_SIGNING_KEY (Gemini/Groq unused — not needed)
 
 # Root fix (2026-11-04): published site was a stale broken build

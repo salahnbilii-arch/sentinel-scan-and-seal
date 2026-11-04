@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Shell } from "@/components/Shell";
+import { CodeTextarea } from "@/components/CodeTextarea";
 import { SectionBoundary } from "@/components/SectionBoundary";
 import { SeverityBadge, Terminal } from "@/components/ops";
 import { scanCode } from "@/lib/agents.functions";
@@ -115,9 +116,9 @@ function SentinelPage() {
               load sample
             </button>
           </div>
-          <textarea
+          <CodeTextarea
             value={code}
-            onChange={(e) => setCode(e.target.value)}
+            onValueChange={setCode}
             spellCheck={false}
             rows={18}
             className="mt-3 w-full resize-y rounded-md border border-input bg-background/70 p-3 font-mono text-xs leading-relaxed text-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring"
@@ -363,7 +364,8 @@ function Explain({ code }: { code: string }) {
         ) : (
           <>
             <p className="mt-3 font-mono text-[11px] text-muted-foreground">
-              Explained by {out.model} · {out.latencyMs} ms
+              Explained by {out.model} · {out.latencyMs} ms ·{" "}
+              {out.usage?.completionTokens ?? "?"} output tokens
             </p>
             <pre
               dir={lang === "ar" ? "rtl" : "ltr"}

@@ -318,6 +318,7 @@ export const RULES: Rule[] = [
       "MD5 and SHA-1 are collision-broken and unfit for passwords, signatures or integrity checks.",
     remediation:
       "Use SHA-256 or better for integrity, and Argon2id, scrypt or bcrypt for passwords.",
+    scope: CODE_TYPES,
     detect: perLine(/\b(?:md5|sha1)\s*\(|createHash\(\s*["'](?:md5|sha1)["']/i),
     patch: {
       python: () =>
@@ -336,6 +337,7 @@ export const RULES: Rule[] = [
     description:
       "Debug mode can expose stack traces, environment variables and interactive consoles.",
     remediation: "Read the flag from the environment and default it to off.",
+    scope: [...CODE_TYPES, "container"],
     detect: perLine(/\b(?:DEBUG|debug)\s*[:=]\s*(?:True|true|1)\b/),
     patch: {
       python: () => `DEBUG = os.getenv("DEBUG", "false").lower() == "true"  # default off`,
@@ -353,6 +355,7 @@ export const RULES: Rule[] = [
     description:
       "A floating version makes builds non-reproducible and lets a compromised upstream release reach production.",
     remediation: "Pin exact versions or immutable image digests and upgrade through automation.",
+    scope: ["container", "kubernetes", "manifest"],
     detect: perLine(/^\s*FROM\s+\S+:latest\b|"[\w@/.-]+"\s*:\s*"(?:\*|latest)"/i),
     patch: { all: () => `FROM node:22.11.0-bookworm-slim@sha256:<digest>` },
   },
@@ -366,6 +369,7 @@ export const RULES: Rule[] = [
     description:
       "Identifiable data is sent to log sinks, which usually have wider access and longer retention than the database.",
     remediation: "Redact or hash identifiers before logging.",
+    scope: CODE_TYPES,
     detect: perLine(
       /(?:console\.log|print|logger?\.(?:info|debug|warn))\s*\([^)]*(?:email|password|ssn|iban|passport|phone|token)/i,
     ),
@@ -384,6 +388,7 @@ export const RULES: Rule[] = [
     compliance: ["GDPR Art. 32", "NIS2 Art. 21"],
     description: "A mutating endpoint has no identity check, so anonymous callers can write data.",
     remediation: "Require an authenticated principal and authorise the action for its role.",
+    scope: CODE_TYPES,
     detect: (source) => {
       const re =
         /@app\.(?:post|put|patch|delete)\([^)]*\)[ \t]*\r?\n[ \t]*(?:async\s+)?def\s+\w+\(([^)]*)\)/gi;
@@ -412,6 +417,7 @@ export const RULES: Rule[] = [
       "The workload can reach the container runtime or host network, which is equivalent to root on the node.",
     remediation:
       "Drop privileged mode, add only required capabilities and avoid mounting the Docker socket.",
+    scope: ["container", "kubernetes"],
     detect: perLine(/privileged:\s*true|hostNetwork:\s*true|\/var\/run\/docker\.sock/i),
     patch: {
       all: () =>

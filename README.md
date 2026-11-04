@@ -6,7 +6,7 @@
 
 Paste code → deterministic security scan (12 rules) → findings with patches → AI explanation (EN/AR/FR) → one-click patch → re-scan proves CLEAN → signed verification artifact + certificate → benchmark against a naive grep baseline. Plus: scan any public GitHub repo, and a DevOps auto-healer for dependency conflicts.
 
-Live demo: https://sentinel-scan-and-seal.lovable.app (build sentinelops-20261104-2221Z at last verification, Nov 4, 2026). No login, no keys, no phone number — open the URL and paste code.
+Live demo: https://sentinelops.numaa.workers.dev (build sentinelops-20261104-2221Z at last verification, Nov 4, 2026). No login, no keys, no phone number — open the URL and paste code.
 
 ## Verified live (Nov 4, 2026, on the published build)
 

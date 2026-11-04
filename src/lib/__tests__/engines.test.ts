@@ -68,6 +68,13 @@ describe("scanner (reference rules)", () => {
     expect((await runSecurityScan("re.exec(s)")).findings.some((f) => f.ruleId === "SEC-003")).toBe(false);
   });
 
+  it("catalog exposes every CWE the rule can fire with (SEC-003 alias)", () => {
+    const sec003 = ruleCatalog().find((r) => r.id === "SEC-003");
+    expect(sec003?.cwe).toBe("CWE-95");
+    expect(sec003?.cweAliases).toContain("CWE-78");
+    expect(ruleCatalog().find((r) => r.id === "SEC-001")?.cweAliases).toBeUndefined();
+  });
+
   it("every finding carries the CWE of its rule (SEC-003 per pattern)", async () => {
     const r = await runSecurityScan(BAD);
     for (const f of r.findings) {
@@ -168,6 +175,8 @@ describe("explain patch language", () => {
     expect(detectLanguage('API_KEY = "sk_live_9f8e7d6c5b4a3210"\nDEBUG = True')).toBe("python");
     expect(detectLanguage('const cp = require("child_process");\nconst t = 1;')).toBe("javascript");
     expect(detectLanguage("SELECT * FROM users WHERE id = 1")).toBe("unknown");
+    // terse one-liners: arrow with expression body must still read as JavaScript
+    expect(detectLanguage("const handler = (input) => eval(input);")).toBe("javascript");
   });
 
   it("Python input → Python patch rule; unknown → no Patch section", () => {

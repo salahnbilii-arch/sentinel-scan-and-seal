@@ -469,6 +469,7 @@ export async function runSecurityScan(
 
   for (const rule of active) {
     const hits = rule.detect(source, lines).slice(0, MAX_HITS_PER_RULE);
+    for (const line of hits) {
       const evidence = (lines[line - 1] ?? "").trim();
       findings.push({
         id: `${rule.id}@${line}`,

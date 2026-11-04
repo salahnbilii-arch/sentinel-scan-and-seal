@@ -84,17 +84,23 @@ export function parseRepoUrl(input: string): { owner: string; repo: string; bran
     : { owner: parts[0]!, repo: parts[1]!.replace(/\.git$/, "") };
 }
 
-/** GitHub REST API authentication. The token lives only in the server runtime
- *  (GITHUB_API_KEY, set via Lovable Secrets/Connectors) and is never sent to the
- *  browser, logged, or committed. Anonymous calls stay subject to GitHub's low
- *  unauthenticated rate limit, and the result says which mode was used. */
-function ghHeaders(): { headers: HeadersInit; apiAuth: "token" | "anonymous" } {
-  const token = process.env["GITHUB_API_KEY"];
-  if (token) {
+/** GitHub REST API authentication. When the project has a GitHub connection
+ *  (GITHUB_API_KEY + LOVABLE_API_KEY, injected by Lovable), REST calls are routed
+ *  through the Lovable connector gateway — the credential is a connection key for
+ *  the gateway, not a GitHub token, so it must never be sent to api.github.com
+ *  directly and never leaves the server runtime. Without a connection the scan
+ *  falls back to anonymous api.github.com access, and the result always reports
+ *  which mode ran. */
+function ghAuth(): { base: string; headers: HeadersInit; apiAuth: "token" | "anonymous" } {
+  const connectionKey = process.env["GITHUB_API_KEY"];
+  const lovableKey = process.env["LOVABLE_API_KEY"];
+  if (connectionKey && lovableKey) {
     return {
+      base: "https://connector-gateway.lovable.dev/github",
       headers: {
         Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${lovableKey}`,
+        "X-Connection-Api-Key": connectionKey,
         "User-Agent": "SentinelOpsAI-Scanner",
         "X-GitHub-Api-Version": "2022-11-28",
       },
@@ -102,6 +108,7 @@ function ghHeaders(): { headers: HeadersInit; apiAuth: "token" | "anonymous" } {
     };
   }
   return {
+    base: "https://api.github.com",
     headers: {
       Accept: "application/vnd.github+json",
       "User-Agent": "SentinelOpsAI-Scanner",
@@ -115,9 +122,9 @@ const SEV_ORDER: Record<string, number> = { critical: 0, high: 1, medium: 2, low
 
 export async function scanGithubRepo(input: string): Promise<RepoScanResult> {
   const { owner, repo, branch } = parseRepoUrl(input);
-  const { headers, apiAuth } = ghHeaders();
+  const { base, headers, apiAuth } = ghAuth();
   const gh = async (path: string): Promise<Response> =>
-    fetch(`https://api.github.com${path}`, {
+    fetch(`${base}${path}`, {
       headers,
       signal: AbortSignal.timeout(30_000),
     });

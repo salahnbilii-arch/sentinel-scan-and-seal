@@ -212,6 +212,13 @@ describe("scan patch language (findings cards)", () => {
     expect(r.findings.find((f) => f.ruleId === "SEC-007")?.patch).toContain("scryptSync");
   });
 
+  it("terse JS one-liner → JavaScript patch on SEC-003", async () => {
+    const r = await runSecurityScan("const handler = (input) => eval(input);");
+    const sec3 = r.findings.find((f) => f.ruleId === "SEC-003");
+    expect(sec3?.cwe).toBe("CWE-95");
+    expect(sec3?.patch ?? "").toContain("JSON.parse");
+  });
+
   it("Unknown language → no patch for language-tied rules", async () => {
     const sec1 = (await runSecurityScan('api_key = "sk_live_9f8e7d6c5b4a3210"')).findings[0];
     expect(sec1?.ruleId).toBe("SEC-001");

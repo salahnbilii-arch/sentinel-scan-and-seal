@@ -23,7 +23,7 @@ describe("sidebar navigation (one source of truth)", () => {
     expect(new Set(paths).size).toBe(8);
     for (const item of NAV) {
       const file = ROUTE_FILES[item.to];
-      expect(file, `no route mapping for ${item.to}`).toBeTruthy();
+      if (!file) throw new Error(`no route mapping for ${item.to}`);
       expect(
         existsSync(resolve(import.meta.dirname, "../../routes", file)),
         `route file missing for ${item.to}`,

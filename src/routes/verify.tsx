@@ -42,7 +42,6 @@ const CLEAN = `import os\nAPI_KEY = os.environ["API_KEY"]\nrows = db.execute("SE
 function VerifyPage() {
   const run = useServerFn(verifyWithReport);
   const recheck = useServerFn(recheckSignature);
-  const scan = useServerFn(scanCode);
   const navigate = useNavigate();
   const [source, setSource] = useState(VULNERABLE);
   const [name, setName] = useState("artifact.txt");

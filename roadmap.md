@@ -32,7 +32,7 @@ P1 Overview loads with live benchmark stats, no horizontal overflow; P2 Sentinel
 
 # Remix setup (2026-11-04)
 
-- [ ] Update BASETEN_API_KEY
-- [ ] Update SENTINELOPS_AUDIT_SIGNING_KEY
-- [ ] Fresh migration set + counters schema in the new database
+- [x] Update BASETEN_API_KEY
+- [x] Update SENTINELOPS_AUDIT_SIGNING_KEY
+- [x] Fresh migration set + counters schema in the new database
 - [ ] Publish, then run gate against the published URL

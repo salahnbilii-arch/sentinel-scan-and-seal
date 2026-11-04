@@ -58,8 +58,8 @@ describe("evidence pack coherence", () => {
     const { artifact } = await runVerificationWithReport(SOURCE, "pack.py");
     const otherReport = await runSecurityScan(SOURCE, "other-run.py");
     const benchmark = await runBenchmark();
-    await expect(
-      buildEvidencePack({ report: otherReport, artifact, benchmark }),
-    ).rejects.toThrow(/coherence failed/);
+    await expect(buildEvidencePack({ report: otherReport, artifact, benchmark })).rejects.toThrow(
+      /coherence failed/,
+    );
   });
 });

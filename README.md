@@ -1,134 +1,63 @@
-# SentinelOps AI
+# SentinelOps AI — Autonomous Security & DevOps Command Center
 
-**Deterministic security scanning, CI-failure healing and signed verification, with Meta Muse Spark Open explanations.**
+> Disclosure (read first): SentinelOps began as a pre-existing Lovable prototype created before the hackathon. This repository is NEW, created during the Meta Global AI Developer Hackathon (Oct 26 – Nov 4, 2026). The code in this repo is the event-week build: rule scoping by file type, multilingual AI explanations, signed verification, benchmark vs. naive baseline, public repo scan, real served-request counters, and the compliance hub were all built, fixed, and live-verified during the event. The demo video opens with the same disclosure. The prototype lineage is disclosed here per the rules.
 
-SentinelOps AI runs a 12-rule deterministic scanner, a 7-signature CI/CD healer and a
-HMAC-signed verification engine behind one dashboard. Model explanations come from a single
-model — `meta-models/muse-spark-open-1026` via Baseten — and only ever see genuine scanner
-output. Built for EU regulatory scrutiny (GDPR, Cyber Resilience Act, NIS2).
+## What it is
 
----
+Paste code → deterministic security scan (12 rules) → findings with patches → AI explanation (EN/AR/FR) → one-click patch → re-scan proves CLEAN → signed verification artifact + certificate → benchmark against a naive grep baseline. Plus: scan any public GitHub repo, and a DevOps auto-healer for dependency conflicts.
 
-## 1. Architecture
+Live demo: https://sentinel-scan-and-seal.lovable.app (build sentinelops-20261104-2221Z at last verification, Nov 4, 2026). No login, no keys, no phone number — open the URL and paste code.
 
-| Layer        | Technology                                                                                  |
-| ------------ | ------------------------------------------------------------------------------------------- |
-| UI           | React 19 + TanStack Router (file-based routing) + Tailwind CSS v4 design system             |
-| Server       | TanStack Start server functions + server routes                                             |
-| Agent engine | `src/lib/agents.server.ts` — scanner rules and healer signatures (deterministic)            |
-| Verification | `src/lib/verify.server.ts` — 5 heuristic obligations, SHA-256 digest, HMAC-SHA256 signature |
-| Model        | `src/lib/meta.server.ts` — Muse Spark Open via Baseten (the only model; no fallback)        |
+## Verified live (Nov 4, 2026, on the published build)
 
-```
-src/
-├── lib/
-│   ├── agents.server.ts      # 12 scanner rules, 7 healer signatures + labelled fallback
-│   ├── meta.server.ts        # Baseten call, retry-once, invented-finding rejection
-│   ├── verify.server.ts      # obligations, trust = 100 - 20 x violated, digest + HMAC
-│   ├── benchmark.server.ts   # benchmark computed live from bundled samples
-│   └── *.functions.ts        # typed RPC boundary (server functions)
-├── routes/
-│   ├── index.tsx             # Command Center (live benchmark)
-│   ├── sentinel.tsx          # AI Code Sentinel (scan + explain)
-│   ├── healer.tsx            # DevOps Auto-Healer
-│   ├── compliance.tsx        # EU Compliance Hub (+ deep analysis)
-│   ├── verify.tsx            # Verify, re-check, download signed JSON
-│   ├── certificate.tsx       # Certificate Studio (operator-entered data only)
-│   └── api/public/v1/        # scan-code · devops-heal · explain · deep-analysis ·
-│                             # verify · check-signature · benchmark · rules · health
-└── components/               # Shell (sidebar/nav), ops primitives
-```
+- Vulnerable Python (eval + os.system): REVIEW, risk 24/100, SEC-003 ×2 (CWE-95 eval, CWE-78 os.system), real patches. Re-scan of patched code: CLEAN, 0/100, banner "risk 24/100 → 0/100".
+- Rule scoping: the scanner applies 9/12 rules to Python files; Dockerfile rules never fire on Python (regression tested on a mixed repo: zero cross-type false positives).
+- Explain: "Explained by meta-models/muse-spark-open-1026 · 8822 ms · 3151 output tokens" (EN, AR RTL, FR; patch stays in the input language).
+- Healer: npm peer conflict, diagnosis + 0.94 labelled "(fixed constant, not measured accuracy)" + overrides patch (react/react-dom 19.2.0).
+- Verify: BLOCKED example, trust 20/100, artifact 131c64051ff7dc49, scan SCN-96B709E6, digest + HMAC-SHA256, re-check "digest matches · signature valid". Evidence pack (scan-report, signed-verification, benchmark, manifest) carries one scanId + artifactId in every file.
+- Benchmark (live-computed): scanner 12/12, 0 false positives; naive grep baseline 9/12, 3 false positives.
+- Repo scan: authenticates with GitHub when GITHUB_API_KEY is set on the server (verified: psf/requests, 50 of 60 scannable files, 28 findings across 25 files, real evidence lines). Without a key it uses the anonymous GitHub API (60 requests/hour) and may rate-limit — the UI reports this honestly instead of faking a scan.
+- Counters: "Counts the public API endpoints only — dashboard scans are separate and not counted." Every increment is a real served request, persisted since server start.
+- Sidebar: 8 entries, identical on every page, including Explain Findings. Compliance hub: GDPR (2016/679), Cyber Resilience Act (2024/2847), NIS2 (2022/2555) mapping + technical measures + API surface — no benchmark duplication.
 
-## 2. API specification
+## Meta models used (the only runtime models)
 
-Base URL: `https://<your-deployment>/api/public/v1`
+- `meta-models/muse-spark-open-1026` (Meta Muse Spark Open), called via Baseten inference (`https://inference.baseten.co/v1`, OpenAI-compatible). Used ONLY for: (1) Explain findings, (2) Deep analysis. No other runtime model is called. No Llama, no third-party model, no fallback. If the model is unavailable, those two features fail closed with an honest error — the deterministic scanner, healer, verifier, and benchmark keep working (they use no model at all).
 
-### `POST /scan-code`
+## Architecture (per part)
 
-```json
-{ "code": "API_KEY = \"sk_live_...\"", "filename": "settings.py" }
-```
+| Part | Model | Input | Output | Inference location | Call |
+| Scanner | none (deterministic regex rules) | pasted code / repo files | findings + risk + patches | local | in-process |
+| Healer | none (deterministic signatures + fixed confidence constants) | dependency conflict description | diagnosis + patch | local | in-process |
+| Explain | Muse Spark Open (Baseten) | findings + code | explanation + patch, EN/AR/FR | Baseten cloud | POST /v1/chat/completions |
+| Deep analysis | Muse Spark Open (Baseten) | code + findings | deep analysis + tokens | Baseten cloud | POST /v1/chat/completions |
+| Verify | none (HMAC-SHA256, Web Crypto) | scan result | signed artifact + trust score | local | in-process |
+| Certificate | none (derived from verification) | verification record | certificate (ID = digest prefix) | local | in-process |
+| Benchmark | none (deterministic) | 20 fixed samples (12 vulnerable + 8 clean) | scanner vs naive-grep scores | local | in-process |
+| Repo scan | none (GitHub API + scanner) | public repo URL | findings across files | GitHub API + local | GET api.github.com |
+| Counters | none (DB-persisted) | served public-API requests | live totals | server DB | in-process |
 
-Returns `scanId`, `verdict` (`blocked|review|clean`), `riskScore` (0–100), severity `counts`,
-and a `findings[]` array with `cwe`, `line`, `evidence`, `remediation`, a ready-to-apply
-`patch` and mapped `compliance` references.
+## Run it yourself (credential-free demo path)
 
-### `POST /devops-heal`
+1. Open the live demo URL above. No account, no key, no phone number.
+2. Paste the vulnerable Python sample (eval + os.system) → Scan → REVIEW 24.
+3. Apply a patch → Re-scan → CLEAN 0.
+4. Explain → see the model id, latency, and tokens in the footer.
+5. Verify → download the JSON + evidence pack; check the scanId/artifactId match in every file.
+6. Benchmark → see scanner 12/12 vs naive grep 9/12.
 
-```json
-{ "log": "npm ERR! code ERESOLVE ..." }
-```
+## Run from source
 
-Returns `detected`, `rootCause`, `targetFile`, the corrected `patch`, recovery `commands[]`
-and `preventions[]`. `signatureScore` is a fixed per-signature constant, not a measured accuracy.
+- `npm install`, `npm run dev` (Vite + React + TanStack). Tests: `npm test` (vitest; 44 tests incl. rule-scoping + pack-coherence regression tests). Lint + typecheck clean.
+- Environment (server only, never committed; see `.env.example`): `BASETEN_API_KEY` (for Explain/Deep), `SENTINELOPS_AUDIT_SIGNING_KEY` (HMAC signing), `GITHUB_API_KEY` (optional; raises GitHub quota for repo scan). No keys are in this repo. Judges may use their own keys; the demo needs none.
 
-### `POST /explain` and `POST /deep-analysis`
+## Honest limits
 
-```json
-{ "code": "..." }
-```
+- The scanner is regex-based: it finds known patterns, not all vulnerabilities. Confidence numbers on healer patches are fixed constants, labelled as such — not measured accuracy.
+- Repo scan caps at 50 files / 120 KB and needs GitHub quota; anonymous access is 60 requests/hour.
+- Counters count public-API requests only, not dashboard scans.
+- No Meta logos are used. No third-party AI voices or music are used in the demo video (narration is the author's own voice or OS voice).
 
-Both re-scan server-side first. Clean input returns `200 { "nothingToDo": true }` and never
-calls the model. The model prompt contains only scanner facts and findings; answers that cite
-a rule or CWE the scanner did not produce are retried once, then rejected
-(`model_output_rejected`).
+## License
 
-### `POST /verify`
-
-```json
-{ "source": "...", "artifactName": "settings.py" }
-```
-
-Runs the same scanner, discharges 5 heuristic obligations and returns a signed artifact:
-`trustScore = 100 - 20 x violatedCount` (`trustFormula` included), the findings embedded in
-the digest, a SHA-256 `digest` and an `HMAC-SHA256` `signature` (`SENTINELOPS_AUDIT_SIGNING_KEY`).
-This is a heuristic audit record — there is no formal proof and no solver.
-
-### `POST /check-signature`
-
-```json
-{ "artifact": { ...signed artifact... } }
-```
-
-Strict shape validation (400 on malformed input), then recomputes digest and signature.
-
-### `GET /benchmark`
-
-Live detection numbers computed from the bundled samples: 12 vulnerable samples (one per rule)
-and 8 clean samples. Includes the per-rule CWE.
-
-### `GET /rules`
-
-The 12-rule catalog with titles, severities, categories and the CWE mapping.
-
-All endpoints validate input, cap payloads at 120 KB, require a JSON object body and send
-CORS headers only for origins explicitly listed in `ALLOWED_ORIGINS`.
-
-## 3. Running locally
-
-```bash
-npm install
-npm run dev      # http://localhost:8080
-npm run build    # production bundle
-```
-
-Quick smoke test:
-
-```bash
-curl -s localhost:8080/api/public/v1/rules
-curl -s -X POST localhost:8080/api/public/v1/scan-code \
-  -H 'content-type: application/json' \
-  -d '{"code":"API_KEY = \"sk_live_abc123456\""}'
-```
-
-Required secrets (server environment, never in code): `BASETEN_API_KEY`,
-`SENTINELOPS_AUDIT_SIGNING_KEY`; optional `MUSE_MAX_TOKENS` (default 8192), `ALLOWED_ORIGINS`.
-
-## 4. Security posture
-
-- No submitted code or logs are persisted; analysis is in-memory per request.
-- Deterministic engines produce identical output for identical input; the model layer is
-  fail-closed and never exposes upstream errors or keys.
-- No client-side hashing or signing: SHA-256 and HMAC are server-only.
-- Patches are always proposed, never applied automatically.
-- The dashboard contains no simulated status indicators; every number shown is computed live.
+MIT.

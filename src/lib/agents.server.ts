@@ -457,16 +457,6 @@ export async function runSecurityScan(
   const lines = source.split("\n");
   const findings: Finding[] = [];
   const lang = detectLanguage(source);
-  const trace = [
-    `scan: target=${filename} bytes=${source.length} lines=${lines.length}`,
-    `scan: applying ${RULES.length} rules`,
-    `scan: patch language=${lang}`,
-  ];
-
-  const t0 = performance.now();
-  const lines = source.split("\n");
-  const findings: Finding[] = [];
-  const lang = detectLanguage(source);
   const fileType = classifyFileType(filename, source);
   // Scoping: a rule only runs on file types it applies to. This is what keeps a
   // Dockerfile rule from firing on a Python import line.
@@ -478,7 +468,7 @@ export async function runSecurityScan(
   ];
 
   for (const rule of active) {
-    for (const line of hits) {
+    const hits = rule.detect(source, lines).slice(0, MAX_HITS_PER_RULE);
       const evidence = (lines[line - 1] ?? "").trim();
       findings.push({
         id: `${rule.id}@${line}`,

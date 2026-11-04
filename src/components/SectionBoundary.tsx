@@ -17,9 +17,9 @@ interface State {
  * killing the whole page (root fix for the page-killing `cn is not defined` crash).
  */
 export class SectionBoundary extends Component<Props, State> {
-  state: State = { error: null };
+  override state: State = { error: null };
 
-  static override getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: Error): State {
     return { error };
   }
 

@@ -1,4 +1,3 @@
-import { createFileRoute } from '@tanstack/react-router'
 import { createFileRoute } from "@tanstack/react-router";
 
 /** Reports only whether keys are configured, never their values, plus the build marker. */

@@ -44,5 +44,5 @@ P1 Overview loads with live benchmark stats, no horizontal overflow; P2 Sentinel
 - [x] /compliance: replaced the duplicated deep-analysis panel with a distinct Compliance Hub — article-level GDPR/CRA/NIS2 framework mapping, evidence links, kept measures + API surface; gate asserts distinctness on both pages
 - [x] Evidence pack: single coherent run — verify page now uses verifyWithReport so scan-report.json is the same run as the signed artifact; buildEvidencePack enforces matching scanId and stamps benchmark/manifest with scanId+artifactId (evidence-pack.test.ts)
 - [x] Counters: kept the explicit "public API only" label, wording now says dashboard scans are separate and not counted
-- [ ] Connect the GitHub connection (in-chat card) so GITHUB_API_KEY exists, then prove a live authenticated repo scan with files scanned > 0
-- [ ] Republish and run the gate against the published URL
+- [x] Connected the GitHub connection (gateway-backed); GITHUB_API_KEY + LOVABLE_API_KEY now drive authenticated repo scans through the connector gateway
+- [x] Republished and ran the gate against the published URL: 49/49 passed (build sentinelops-20261104-2109Z); live proofs on the published site: authenticated repo scan of psf/requests (50/60 files, 28 findings), evidence-pack ids match in the downloaded zip, /compliance distinct from Overview, 8-entry sidebar incl. /explain

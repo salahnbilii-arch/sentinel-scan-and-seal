@@ -18,7 +18,7 @@ API_KEY = os.environ["API_KEY"]
 rows = db.execute("SELECT * FROM users WHERE id = %(id)s", {"id": user_id})`;
 
 // Exactly one violated obligation (SEC-001): trust must be 100 - 20 x 1 = 80.
-const VERIFY_SOURCE = `API_KEY = "sk_live_9f8e7d6c5b4a3210"`;
+const VERIFY_SOURCE = `API_KEY = "EXAMPLE_KEY_NOT_REAL_0000"`;
 
 const NPM_LOG = `npm ERR! code ERESOLVE
 npm ERR! ERESOLVE could not resolve

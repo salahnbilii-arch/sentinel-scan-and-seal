@@ -187,6 +187,7 @@ export const RULES: Rule[] = [
       "A long-lived credential is committed in source. Anyone who can read the repository, a CI cache or a fork obtains its access.",
     remediation:
       "Move the value to a secret store, read it at runtime, and rotate the exposed credential.",
+    scope: "any",
     detect: perLine(
       /(?:api[_-]?key|secret|passwd|password|token|access[_-]?key|private[_-]?key)\s*[:=]\s*["'`][^"'`\s]{6,}["'`]/i,
     ),
@@ -206,6 +207,7 @@ export const RULES: Rule[] = [
       "Input is interpolated into a SQL statement, so an attacker can change the query and read or alter data.",
     remediation:
       "Use parameterised queries or prepared statements; never concatenate input into SQL.",
+    scope: CODE_TYPES,
     detect: perLine(
       /\b(?:select\s.+\sfrom|insert\s+into|update\s+\w+\s+set|delete\s+from)\b.*(?:["'`]\s*\+|\+\s*["'`]|\$\{|%s|\bf["'])/i,
     ),
@@ -228,6 +230,7 @@ export const RULES: Rule[] = [
       "Evaluating a runtime string (eval, new Function) turns any input-handling bug into code execution (CWE-95); running OS commands from unsanitised input (os.system, shell=True, child_process.exec) lets an attacker execute shell commands (CWE-78). The CWE is chosen per matched pattern.",
     remediation:
       "Dispatch through an allow-listed map of functions or parse data with a safe parser; never pass input to a shell.",
+    scope: CODE_TYPES,
     detect: perLine(
       /(?<![.\w])(?:eval|exec|execSync)\s*\(|new\s+Function\s*\(|os\.system\s*\(|child_process\.exec(?:Sync)?\s*\(|shell\s*=\s*True/,
     ),
@@ -252,6 +255,7 @@ export const RULES: Rule[] = [
     description: "Without certificate validation any on-path attacker can read and modify traffic.",
     remediation:
       "Re-enable verification and install the correct CA bundle instead of bypassing trust.",
+    scope: "any",
     detect: perLine(
       /verify\s*=\s*False|rejectUnauthorized\s*:\s*false|NODE_TLS_REJECT_UNAUTHORIZED\s*=\s*["']?0|--insecure|curl\s+-k\b/i,
     ),
@@ -272,6 +276,7 @@ export const RULES: Rule[] = [
     description:
       "The image executes as UID 0, so any application escape becomes root on the container.",
     remediation: "Create an unprivileged user and switch to it before the entrypoint.",
+    scope: ["container"],
     detect: (source, lines) => {
       const explicitRoot = lines.findIndex((l) => /^\s*USER\s+root\s*$/i.test(l));
       if (explicitRoot >= 0) return [explicitRoot + 1];
@@ -293,6 +298,7 @@ export const RULES: Rule[] = [
     description:
       "Any origin may read responses, which enables cross-site data theft from a victim's session.",
     remediation: "Pin an explicit allow-list of trusted origins.",
+    scope: CODE_TYPES,
     detect: perLine(/Access-Control-Allow-Origin["'\s:=,]+\*|allow_origins\s*=\s*\[\s*["']\*/i),
     patch: {
       python: () =>

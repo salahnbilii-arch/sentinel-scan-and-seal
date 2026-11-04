@@ -82,9 +82,21 @@ const FRAMEWORKS = [
 ];
 
 const EVIDENCE_LINKS = [
-  { to: "/verify", label: "Formal Verification", detail: "Run a signed, re-checkable audit artifact." },
-  { to: "/certificate", label: "Certificate Studio", detail: "Render an audit certificate from a real verify run." },
-  { to: "/repo", label: "Public Repo Scan", detail: "Aggregate gate verdict over a GitHub repository." },
+  {
+    to: "/verify",
+    label: "Formal Verification",
+    detail: "Run a signed, re-checkable audit artifact.",
+  },
+  {
+    to: "/certificate",
+    label: "Certificate Studio",
+    detail: "Render an audit certificate from a real verify run.",
+  },
+  {
+    to: "/repo",
+    label: "Public Repo Scan",
+    detail: "Aggregate gate verdict over a GitHub repository.",
+  },
 ] as const;
 
 function CompliancePage() {

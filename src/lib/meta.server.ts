@@ -62,12 +62,16 @@ export function languageDirective(lang: ExplainLanguage): string {
   return EXPLAIN_LANGUAGES.find((l) => l.code === lang)?.directive ?? EXPLAIN_LANGUAGES[0].directive;
 }
 
-/**
- * Fail-closed chat call. Empty output (typically hidden-reasoning exhaustion, finish_reason "length") and
- * answers that cite findings the scanner never produced are retried once with the same model and prompt.
- * Every failure becomes a generic error: upstream bodies and keys are never exposed.
- */
-export async function callMuse(system: string, user: string, findings: Finding[]): Promise<MetaOutput> {
+/** Fail-closed chat call. Empty output (typically hidden-reasoning exhaustion, finish_reason "length"),
+ * answers that cite findings the scanner never produced and answers that fail an optional output
+ * validator (e.g. wrong language) are retried once with the same model and prompt.
+ * Every failure becomes a generic error: upstream bodies and keys are never exposed. */
+export async function callMuse(
+  system: string,
+  user: string,
+  findings: Finding[],
+  validate?: (text: string) => string | null,
+): Promise<MetaOutput> {
   const key = process.env["BASETEN_API_KEY"];
   if (!key) throw new HttpError(503, "model_unavailable", "The Meta model is not configured. Set BASETEN_API_KEY on the server.");
   const t0 = Date.now();
@@ -117,6 +121,12 @@ export async function callMuse(system: string, user: string, findings: Finding[]
       console.error(`[meta] attempt ${attempt}: answer cited ${invented.join(",")}`);
       continue;
     }
+    const invalid = validate?.(text) ?? null;
+    if (invalid) {
+      lastReason = invalid;
+      console.error(`[meta] attempt ${attempt}: ${invalid}`);
+      continue;
+    }
     return {
       model: META_MODEL,
       text,
@@ -128,8 +138,14 @@ export async function callMuse(system: string, user: string, findings: Finding[]
   const msg =
     lastReason === "invented_findings"
       ? "The Meta model's answer cited findings the scanner did not produce, so it was rejected. Nothing was generated."
-      : "The Meta model returned no usable answer after one retry. Nothing was generated.";
-  throw new HttpError(502, lastReason === "invented_findings" ? "model_output_rejected" : "model_unavailable", msg);
+      : lastReason === "wrong_language"
+        ? "The Meta model's answer was not in the requested language, so it was rejected. Nothing was generated."
+        : "The Meta model returned no usable answer after one retry. Nothing was generated.";
+  throw new HttpError(
+    502,
+    lastReason === "invented_findings" || lastReason === "wrong_language" ? "model_output_rejected" : "model_unavailable",
+    msg,
+  );
 }
 
 const SEV_ORDER: Record<Severity, number> = { critical: 0, high: 1, medium: 2, low: 3 };

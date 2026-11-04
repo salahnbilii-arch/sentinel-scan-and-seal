@@ -51,6 +51,8 @@ interface Rule {
   detect: (source: string, lines: string[]) => number[];
   /** Optional per-hit CWE override; the correct CWE depends on the matched pattern. */
   cweFor?: (evidence: string) => string;
+  /** Additional CWEs this rule can fire with (per-hit overrides of `cwe`), for the public catalog. */
+  cweAliases?: string[];
   /** Patch suggestions keyed by input language; `all` is language-neutral (Dockerfile, Kubernetes, config). */
   patch: {
     python?: (evidence: string) => string;
@@ -78,7 +80,7 @@ export function detectLanguage(code: string): SourceLanguage {
     (/\bprint\s*\(|\bos\.(system|environ|path)\b|shell\s*=\s*True|\bself\./.test(code) ? 2 : 0);
   const jsHits =
     (code.match(
-      /\b(const|let|var)\s+\w+\s*=|\bfunction\s+\w*\s*\(|=>\s*[{(]|\brequire\s*\(|\bmodule\.exports\b|\bexport\s+(default|const|function|class)\b/g,
+      /\b(const|let|var)\s+\w+\s*=|\bfunction\s+\w*\s*\(|=>\s*(?:[{(]|\w)|\brequire\s*\(|\bmodule\.exports\b|\bexport\s+(default|const|function|class)\b/g,
     )?.length ?? 0) +
     (/\bprocess\.env\b|\bnew\s+Function\b|\bchild_process\b|\basync\s+function\b/.test(code) ? 2 : 0);
   if (pyHits >= 2 && pyHits > jsHits) return "python";
@@ -97,7 +99,14 @@ const envSecretPatch = (ev: string, kind: "python" | "javascript") => {
 
 /** Public, code-free view of the rule set: the single source of truth for the rule-id to CWE mapping. */
 export const ruleCatalog = () =>
-  RULES.map((r) => ({ id: r.id, title: r.title, severity: r.severity, category: r.category, cwe: r.cwe }));
+  RULES.map((r) => ({
+    id: r.id,
+    title: r.title,
+    severity: r.severity,
+    category: r.category,
+    cwe: r.cwe,
+    ...(r.cweAliases ? { cweAliases: r.cweAliases } : {}),
+  }));
 
 export const RULES: Rule[] = [
   {
@@ -124,7 +133,7 @@ export const RULES: Rule[] = [
   },
   {
     id: "SEC-003", title: "Dynamic code execution or command injection", severity: "high",
-    category: "Injection", cwe: "CWE-95", compliance: ["EU CRA Annex I"],
+    category: "Injection", cwe: "CWE-95", cweAliases: ["CWE-78"], compliance: ["EU CRA Annex I"],
     description:
       "Evaluating a runtime string (eval, new Function) turns any input-handling bug into code execution (CWE-95); running OS commands from unsanitised input (os.system, shell=True, child_process.exec) lets an attacker execute shell commands (CWE-78). The CWE is chosen per matched pattern.",
     remediation: "Dispatch through an allow-listed map of functions or parse data with a safe parser; never pass input to a shell.",

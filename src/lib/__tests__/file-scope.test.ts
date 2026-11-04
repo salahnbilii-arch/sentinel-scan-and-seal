@@ -65,7 +65,7 @@ describe("classifyFileType", () => {
 
   it("sniffs extensionless pastes without confusing Python imports with Dockerfiles", () => {
     expect(classifyFileType("audit-target", PY_CLEAN_IMPORTS)).toBe("python");
-    expect(classifyFileType("snippet.txt", "FROM node:22\nRUN npm ci\nCMD [\"node\"]")).toBe(
+    expect(classifyFileType("snippet.txt", 'FROM node:22\nRUN npm ci\nCMD ["node"]')).toBe(
       "container",
     );
   });
@@ -126,7 +126,9 @@ describe("rule scoping (zero cross-type false positives)", () => {
       const type = classifyFileType(name, source);
       const isInfra = type === "container" || type === "kubernetes" || type === "manifest";
       for (const f of r.findings) {
-        const wronglyScoped = isInfra ? codeOnly.includes(f.ruleId) : containerOnly.includes(f.ruleId);
+        const wronglyScoped = isInfra
+          ? codeOnly.includes(f.ruleId)
+          : containerOnly.includes(f.ruleId);
         if (wronglyScoped) crossType += 1;
       }
     }
@@ -135,13 +137,15 @@ describe("rule scoping (zero cross-type false positives)", () => {
     // Real findings still fire in the mixed repo: root container, md5, eval, floating dep.
     const byFile = Object.fromEntries(
       await Promise.all(
-        repo.map(async ([name, source]) => [name, (await runSecurityScan(source, name)).findings] as const),
+        repo.map(
+          async ([name, source]) => [name, (await runSecurityScan(source, name)).findings] as const,
+        ),
       ),
     );
     expect(byFile["Dockerfile"]!.some((f) => f.ruleId === "SEC-005")).toBe(true);
-    expect(byFile["src/legacy.py"]!.some((f) => f.ruleId === "SEC-007" && f.cwe === "CWE-327")).toBe(
-      true,
-    );
+    expect(
+      byFile["src/legacy.py"]!.some((f) => f.ruleId === "SEC-007" && f.cwe === "CWE-327"),
+    ).toBe(true);
     expect(byFile["src/index.js"]!.some((f) => f.ruleId === "SEC-003")).toBe(true);
     expect(byFile["package.json"]!.some((f) => f.ruleId === "SEC-009")).toBe(true);
   });

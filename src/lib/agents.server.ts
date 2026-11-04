@@ -80,13 +80,7 @@ export type SourceLanguage = "python" | "javascript" | "unknown";
  * types; container rules never see source files and language rules never see
  * infrastructure files.
  */
-export type FileType =
-  | "python"
-  | "javascript"
-  | "container"
-  | "kubernetes"
-  | "manifest"
-  | "other";
+export type FileType = "python" | "javascript" | "container" | "kubernetes" | "manifest" | "other";
 
 export function classifyFileType(filename: string, source: string): FileType {
   const base = (filename.split(/[\\/]/).pop() ?? "").toLowerCase();

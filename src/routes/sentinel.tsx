@@ -364,8 +364,8 @@ function Explain({ code }: { code: string }) {
         ) : (
           <>
             <p className="mt-3 font-mono text-[11px] text-muted-foreground">
-              Explained by {out.model} · {out.latencyMs} ms ·{" "}
-              {out.usage?.completionTokens ?? "?"} output tokens
+              Explained by {out.model} · {out.latencyMs} ms · {out.usage?.completionTokens ?? "?"}{" "}
+              output tokens
             </p>
             <pre
               dir={lang === "ar" ? "rtl" : "ltr"}

@@ -51,6 +51,12 @@ interface Rule {
   detect: (source: string, lines: string[]) => number[];
   /** Optional per-hit CWE override; the correct CWE depends on the matched pattern. */
   cweFor?: (evidence: string) => string;
+  /**
+   * File types this rule may fire on. A rule that runs on any input is "any";
+   * otherwise the list is exhaustive. Scoping is how cross-type false positives
+   * are prevented (e.g. a Dockerfile rule must never fire on a Python import).
+   */
+  scope: readonly FileType[] | "any";
   /** Additional CWEs this rule can fire with (per-hit overrides of `cwe`), for the public catalog. */
   cweAliases?: string[];
   /** Patch suggestions keyed by input language; `all` is language-neutral (Dockerfile, Kubernetes, config). */
@@ -67,6 +73,63 @@ const perLine = (re: RegExp) => (_s: string, lines: string[]) =>
 const lineOfIndex = (source: string, index: number) => source.slice(0, index).split("\n").length;
 
 export type SourceLanguage = "python" | "javascript" | "unknown";
+
+/**
+ * What kind of input a scan is looking at, derived from the filename and — for
+ * extensionless pastes — from the content itself. Rules are scoped to these
+ * types; container rules never see source files and language rules never see
+ * infrastructure files.
+ */
+export type FileType =
+  | "python"
+  | "javascript"
+  | "container"
+  | "kubernetes"
+  | "manifest"
+  | "other";
+
+export function classifyFileType(filename: string, source: string): FileType {
+  const base = (filename.split(/[\\/]/).pop() ?? "").toLowerCase();
+  if (
+    base.startsWith("dockerfile") ||
+    base.endsWith(".dockerfile") ||
+    base.includes("docker-compose") ||
+    base === ".dockerignore"
+  )
+    return "container";
+  if (
+    base === "package.json" ||
+    base === "package-lock.json" ||
+    base.endsWith(".lock") ||
+    base === "requirements.txt" ||
+    base === "pipfile" ||
+    base === "pyproject.toml"
+  )
+    return "manifest";
+  if (/\.(?:py|pyw)$/i.test(base)) return "python";
+  if (/\.(?:js|jsx|mjs|cjs|ts|tsx)$/i.test(base)) return "javascript";
+  if (/\.(?:ya?ml|tf|hcl)$/i.test(base))
+    return base.endsWith(".tf") ||
+      /(?:^|\n)\s*(?:containers?:|kind:\s*(?:deployment|pod|statefulset|daemonset)|privileged:)/i.test(
+        source,
+      )
+      ? "kubernetes"
+      : "other";
+  // Extensionless pastes: sniff the content. Container instructions are matched
+  // case-SENSITIVELY here — a case-insensitive match would collide with the
+  // Python `from x import y` statement.
+  if (/^\s*(?:FROM|RUN|CMD|ENTRYPOINT|EXPOSE|COPY|ADD|WORKDIR|ENV)\s+\S/m.test(source))
+    return "container";
+  if (/^\s*(?:apiVersion|kind|metadata|spec|volumes|containers)\s*:/m.test(source))
+    return "kubernetes";
+  const lang = detectLanguage(source);
+  if (lang === "python") return "python";
+  if (lang === "javascript") return "javascript";
+  return "other";
+}
+
+/** Rules that apply to "other" are the language-agnostic code rules; container rules never do. */
+const CODE_TYPES: readonly FileType[] = ["python", "javascript", "other"];
 
 /**
  * Best-effort language detection so finding patches always match the input language.

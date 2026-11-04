@@ -3,7 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 const run = async ({ request }: { request: Request }) => {
   const { handleApi, requireText, MAX_ARTIFACT_CHARS } = await import("@/lib/api-helpers.server");
   const { explainFindings } = await import("@/lib/meta.server");
-  return handleApi(request, async (body) => {
+  return handleApi(request, async (rawBody) => {
+    const body = rawBody as Record<string, unknown>;
     const code = requireText(body, "code", 1, MAX_ARTIFACT_CHARS);
     // Only the three supported output languages; anything else falls back to English.
     const requested = typeof body?.language === "string" ? body.language : "en";

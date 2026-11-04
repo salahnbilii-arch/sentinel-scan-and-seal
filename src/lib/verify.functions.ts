@@ -5,6 +5,7 @@ import {
   checkSignature,
   parseArtifact,
   runVerification,
+  runVerificationWithReport,
   type SignedArtifact,
 } from "./verify.server";
 
@@ -16,6 +17,15 @@ const VerifyInput = z.object({
 export const formalVerify = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => VerifyInput.parse(input))
   .handler(async ({ data }) => runVerification(data.source, data.artifactName ?? "artifact.txt"));
+
+/** Verify page variant: one coherent run — the artifact plus the full scan
+ *  report of the very same run, so the evidence pack can bundle them with a
+ *  matching scanId. */
+export const verifyWithReport = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => VerifyInput.parse(input))
+  .handler(async ({ data }) =>
+    runVerificationWithReport(data.source, data.artifactName ?? "artifact.txt"),
+  );
 
 export const recheckSignature = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>

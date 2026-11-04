@@ -272,23 +272,28 @@ describe("scan patch language (findings cards)", () => {
 // proves a counter increments after a real served API call.
 
 describe("evidence pack", () => {
-  it("bundles the real scan report, signed verification and benchmark as JSON files", async () => {
+  it("bundles the scan report, signed verification and benchmark of one coherent run", async () => {
     const { buildEvidencePack } = await import("../evidence-pack");
-    const report = await runSecurityScan(BAD, "x.py");
-    const artifact = await runVerification(BAD, "x.py");
+    const { runVerificationWithReport } = await import("../verify.server");
+    const { artifact, scanReport } = await runVerificationWithReport(BAD, "x.py");
     const benchmark = await runBenchmark();
-    const blob = await buildEvidencePack({ report, artifact, benchmark });
+    const blob = await buildEvidencePack({ report: scanReport, artifact, benchmark });
     expect(blob.size).toBeGreaterThan(0);
     const JSZip = (await import("jszip")).default;
     const zip = await JSZip.loadAsync(await blob.arrayBuffer());
-    const scanReport = JSON.parse((await zip.file("scan-report.json")!.async("string"))!);
+    const reportJson = JSON.parse((await zip.file("scan-report.json")!.async("string"))!);
     const verification = JSON.parse((await zip.file("signed-verification.json")!.async("string"))!);
     const bench = JSON.parse((await zip.file("benchmark.json")!.async("string"))!);
-    expect(scanReport.scanId).toBe(report.scanId);
+    // One run everywhere: the scan report is the run that produced the artifact.
+    expect(verification.scanId).toBe(scanReport.scanId);
+    expect(reportJson.scanId).toBe(artifact.scanId);
+    expect(bench.packagedWith.scanId).toBe(artifact.scanId);
+    expect(bench.packagedWith.artifactId).toBe(artifact.artifactId);
     expect(verification.digest).toBe(artifact.digest);
     expect(verification.signature).toBe(artifact.signature);
     expect(bench.caught).toBe(12);
     expect((await zip.file("manifest.json")!.async("string"))!).toContain(artifact.artifactId);
+    expect((await zip.file("manifest.json")!.async("string"))!).toContain(artifact.scanId);
   });
 });
 

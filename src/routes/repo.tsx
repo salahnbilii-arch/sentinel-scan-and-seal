@@ -126,6 +126,10 @@ function RepoReport({ result }: { result: RepoScanResult }) {
             {result.repo} · {result.branch}
             <br />
             {result.scannedFiles} of {result.candidates} scannable file(s) scanned
+            <br />
+            <span className={result.apiAuth === "token" ? "text-accent" : undefined}>
+              GitHub API: {result.apiAuth === "token" ? "authenticated" : "anonymous"}
+            </span>
           </div>
         </div>
         <div className="mt-4 grid grid-cols-4 gap-2 font-mono text-xs">

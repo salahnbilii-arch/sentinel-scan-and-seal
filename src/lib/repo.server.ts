@@ -42,6 +42,8 @@ export interface RepoScanResult {
   };
   gateVerdict: "blocked" | "review" | "clean";
   notes: string[];
+  /** How the GitHub REST API was authenticated for this scan. */
+  apiAuth: "token" | "anonymous";
   scannedAt: string;
 }
 
@@ -82,11 +84,30 @@ export function parseRepoUrl(input: string): { owner: string; repo: string; bran
     : { owner: parts[0]!, repo: parts[1]!.replace(/\.git$/, "") };
 }
 
-function ghHeaders(): HeadersInit {
+/** GitHub REST API authentication. The token lives only in the server runtime
+ *  (GITHUB_API_KEY, set via Lovable Secrets/Connectors) and is never sent to the
+ *  browser, logged, or committed. Anonymous calls stay subject to GitHub's low
+ *  unauthenticated rate limit, and the result says which mode was used. */
+function ghHeaders(): { headers: HeadersInit; apiAuth: "token" | "anonymous" } {
+  const token = process.env["GITHUB_API_KEY"];
+  if (token) {
+    return {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${token}`,
+        "User-Agent": "SentinelOpsAI-Scanner",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+      apiAuth: "token",
+    };
+  }
   return {
-    Accept: "application/vnd.github+json",
-    "User-Agent": "SentinelOpsAI-Scanner",
-    "X-GitHub-Api-Version": "2022-11-28",
+    headers: {
+      Accept: "application/vnd.github+json",
+      "User-Agent": "SentinelOpsAI-Scanner",
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+    apiAuth: "anonymous",
   };
 }
 
@@ -94,9 +115,10 @@ const SEV_ORDER: Record<string, number> = { critical: 0, high: 1, medium: 2, low
 
 export async function scanGithubRepo(input: string): Promise<RepoScanResult> {
   const { owner, repo, branch } = parseRepoUrl(input);
+  const { headers, apiAuth } = ghHeaders();
   const gh = async (path: string): Promise<Response> =>
     fetch(`https://api.github.com${path}`, {
-      headers: ghHeaders(),
+      headers,
       signal: AbortSignal.timeout(30_000),
     });
 
@@ -112,7 +134,9 @@ export async function scanGithubRepo(input: string): Promise<RepoScanResult> {
     throw new HttpError(
       429,
       "github_rate_limited",
-      "GitHub's API rate limit was reached. Try again later.",
+      apiAuth === "token"
+        ? "GitHub's API rate limit was reached. Try again later."
+        : "GitHub's API rate limit was reached (anonymous access is limited to 60 requests/hour). An operator can raise this by setting GITHUB_API_KEY on the server.",
     );
   }
   if (!metaRes.ok)
@@ -132,7 +156,9 @@ export async function scanGithubRepo(input: string): Promise<RepoScanResult> {
     throw new HttpError(
       429,
       "github_rate_limited",
-      "GitHub's API rate limit was reached. Try again later.",
+      apiAuth === "token"
+        ? "GitHub's API rate limit was reached. Try again later."
+        : "GitHub's API rate limit was reached (anonymous access is limited to 60 requests/hour). An operator can raise this by setting GITHUB_API_KEY on the server.",
     );
   }
   if (!treeRes.ok)
@@ -222,6 +248,7 @@ export async function scanGithubRepo(input: string): Promise<RepoScanResult> {
     totals,
     gateVerdict,
     notes,
+    apiAuth,
     scannedAt: new Date().toISOString(),
   };
 }

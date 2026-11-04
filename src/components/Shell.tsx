@@ -4,6 +4,7 @@ import {
   Award,
   Github,
   Menu,
+  MessageSquareText,
   ScanLine,
   ShieldCheck,
   Stamp,
@@ -15,9 +16,12 @@ import { useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { SectionBoundary } from "@/components/SectionBoundary";
 
-const NAV = [
+/** One navigation source of truth. Exported so tests assert every page shows the
+ *  same 8 entries and every path has a real route file. */
+export const NAV = [
   { to: "/", label: "Command Center", icon: Activity, code: "OPS-00" },
   { to: "/sentinel", label: "AI Code Sentinel", icon: ScanLine, code: "SEC-01" },
+  { to: "/explain", label: "Explain Findings", icon: MessageSquareText, code: "EXP-07" },
   { to: "/repo", label: "Public Repo Scan", icon: Github, code: "RPO-05" },
   { to: "/healer", label: "DevOps Auto-Healer", icon: Wrench, code: "OPS-02" },
   { to: "/compliance", label: "EU Compliance Hub", icon: ShieldCheck, code: "GRC-03" },

@@ -36,3 +36,13 @@ P1 Overview loads with live benchmark stats, no horizontal overflow; P2 Sentinel
 - [x] Update SENTINELOPS_AUDIT_SIGNING_KEY
 - [x] Fresh migration set + counters schema in the new database
 - [x] Publish, then run gate against the published URL
+
+# Fix round 2 (2026-11-04): the 6 audit items as real fixes
+
+- [x] Sidebar: added "Explain Findings" (/explain) to the single NAV source — 8 entries on every page, unit-tested (nav.test.ts) and gate-checked
+- [x] Repo scan: authenticated GitHub REST calls via server-only GITHUB_API_KEY; result reports authenticated/anonymous (apiAuth); rate-limit copy distinguishes token vs anonymous
+- [x] /compliance: replaced the duplicated deep-analysis panel with a distinct Compliance Hub — article-level GDPR/CRA/NIS2 framework mapping, evidence links, kept measures + API surface; gate asserts distinctness on both pages
+- [x] Evidence pack: single coherent run — verify page now uses verifyWithReport so scan-report.json is the same run as the signed artifact; buildEvidencePack enforces matching scanId and stamps benchmark/manifest with scanId+artifactId (evidence-pack.test.ts)
+- [x] Counters: kept the explicit "public API only" label, wording now says dashboard scans are separate and not counted
+- [ ] Connect the GitHub connection (in-chat card) so GITHUB_API_KEY exists, then prove a live authenticated repo scan with files scanned > 0
+- [ ] Republish and run the gate against the published URL

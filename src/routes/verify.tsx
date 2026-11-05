@@ -37,7 +37,7 @@ export const Route = createFileRoute("/verify")({
   component: VerifyPage,
 });
 
-const VULNERABLE = `API_KEY = "sk_live_9f8e7d6c5b4a3210"\nquery = "SELECT * FROM users WHERE id = " + user_id\nresp = requests.get(url, verify=False)\nDEBUG = True`;
+const VULNERABLE = `API_KEY = "EXAMPLE_KEY_NOT_REAL_0000"\nquery = "SELECT * FROM users WHERE id = " + user_id\nresp = requests.get(url, verify=False)\nDEBUG = True`;
 const CLEAN = `import os\nAPI_KEY = os.environ["API_KEY"]\nrows = db.execute("SELECT * FROM users WHERE id = %(id)s", {"id": user_id})`;
 
 function VerifyPage() {

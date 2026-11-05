@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.3",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://lwaqsqcwcmvoeqomubsr.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "sentinelops-ai-platform",
+      "version": "0.2.0",
+      "title": "SentinelOps AI Platform"
+    },
+    "tools": [
+      {
+        "name": "scan_code",
+        "title": "Scan code for vulnerabilities",
+        "description": "Run the SentinelOps Cybersecurity Agent over a source snippet and return findings, severities, CWE mappings and suggested patches.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Raw source code or configuration to audit."
+            },
+            "filename": {
+              "description": "Optional filename used for context in the report, e.g. app.py.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "source"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "devops_heal",
+        "title": "Diagnose and heal a pipeline failure",
+        "description": "Run the SentinelOps DevOps Agent over a CI/CD or runtime failure log and return the root cause, remediation steps and an automated fix.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "log": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Raw CI/CD, container or Kubernetes failure log output."
+            }
+          },
+          "required": [
+            "log"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "formal_verify",
+        "title": "Verify and sign an artifact",
+        "description": "Scan an artifact, run 5 heuristic obligation checks, and return a SHA-256 digest with an HMAC-SHA256 signature. Heuristic checks, not a formal proof.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Raw source code or configuration to verify."
+            },
+            "artifactName": {
+              "description": "Optional artifact name recorded in the signed result.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "source"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

@@ -6,11 +6,11 @@ import { citationProblems, detectLanguage, patchLanguageDirective } from "../met
 import { runBenchmark, naiveScan } from "../benchmark.server";
 import { buildPatchedSource } from "../patched-source";
 
-const BAD = 'API_KEY = "sk_live_9f8e7d6c5b4a3210"\nUSER root\nresp = requests.get(u, verify=False)';
+const BAD = 'API_KEY = "EXAMPLE_KEY_NOT_REAL_0000"\nUSER root\nresp = requests.get(u, verify=False)';
 
 const SAMPLE = `import os, requests
 DEBUG = True
-API_KEY = "sk_live_9f8e7d6c5b4a3210"
+API_KEY = "EXAMPLE_KEY_NOT_REAL_0000"
 
 def get_user(conn, user_id):
     cur = conn.cursor()
@@ -34,7 +34,7 @@ afterAll(() => {
 
 describe("scanner (reference rules)", () => {
   it("weights critical 25 and blocks", async () => {
-    const r = await runSecurityScan(`API_KEY = "sk_live_9f8e7d6c5b4a3210"`);
+    const r = await runSecurityScan(`API_KEY = "EXAMPLE_KEY_NOT_REAL_0000"`);
     expect(r.findings[0]!.id).toBe("SEC-001@1");
     expect(r.riskScore).toBe(25);
     expect(r.verdict).toBe("blocked");
@@ -161,7 +161,7 @@ describe("verification", () => {
 });
 
 describe("meta output guard", () => {
-  const SRC = 'API_KEY = "sk_live_9f8e7d6c5b4a3210"\nos.system(cmd)'; // findings span SEC-001/SEC-003, CWE-798/CWE-78
+  const SRC = 'API_KEY = "EXAMPLE_KEY_NOT_REAL_0000"\nos.system(cmd)'; // findings span SEC-001/SEC-003, CWE-798/CWE-78
 
   it("rejects SEC/CWE ids the scanner did not produce", async () => {
     const findings = (await runSecurityScan(SRC)).findings;
@@ -181,7 +181,7 @@ describe("meta output guard", () => {
 
 describe("explain patch language", () => {
   it("detects the input language", () => {
-    expect(detectLanguage('API_KEY = "sk_live_9f8e7d6c5b4a3210"\nDEBUG = True')).toBe("python");
+    expect(detectLanguage('API_KEY = "EXAMPLE_KEY_NOT_REAL_0000"\nDEBUG = True')).toBe("python");
     expect(detectLanguage('const cp = require("child_process");\nconst t = 1;')).toBe("javascript");
     expect(detectLanguage("SELECT * FROM users WHERE id = 1")).toBe("unknown");
     // terse one-liners: arrow with expression body must still read as JavaScript
@@ -202,7 +202,7 @@ describe("explain patch language", () => {
 describe("scan patch language (findings cards)", () => {
   it("Python input → Python patches", async () => {
     const r = await runSecurityScan(
-      'import os\nAPI_KEY = "sk_live_9f8e7d6c5b4a3210"\nos.system(cmd)\nDEBUG = True',
+      'import os\nAPI_KEY = "EXAMPLE_KEY_NOT_REAL_0000"\nos.system(cmd)\nDEBUG = True',
     );
     const sec1 = r.findings.find((f) => f.ruleId === "SEC-001");
     expect(sec1?.patch).toContain('os.environ["API_KEY"]');
@@ -215,7 +215,7 @@ describe("scan patch language (findings cards)", () => {
 
   it("JS/TS input → JavaScript patches", async () => {
     const r = await runSecurityScan(
-      'const apiKey = "sk_live_9f8e7d6c5b4a3210";\nconst cmd = req.body.cmd;\nchild_process.exec(cmd);\nconst h = createHash("md5");',
+      'const apiKey = "EXAMPLE_KEY_NOT_REAL_0000";\nconst cmd = req.body.cmd;\nchild_process.exec(cmd);\nconst h = createHash("md5");',
     );
     const sec1 = r.findings.find((f) => f.ruleId === "SEC-001");
     expect(sec1?.patch).toContain("process.env");
@@ -235,7 +235,7 @@ describe("scan patch language (findings cards)", () => {
   });
 
   it("Unknown language → no patch for language-tied rules", async () => {
-    const sec1 = (await runSecurityScan('api_key = "sk_live_9f8e7d6c5b4a3210"')).findings[0];
+    const sec1 = (await runSecurityScan('api_key = "EXAMPLE_KEY_NOT_REAL_0000"')).findings[0];
     expect(sec1?.ruleId).toBe("SEC-001");
     expect(sec1?.patch).toBeNull();
     const sec4 = (await runSecurityScan("curl -k https://internal.example/api")).findings.find(

@@ -6,8 +6,7 @@
 
 Paste code → deterministic security scan (12 rules) → findings with patches → AI explanation (EN/AR/FR) → one-click patch → re-scan proves CLEAN → signed verification artifact + certificate → benchmark against a naive grep baseline. Plus: scan any public GitHub repo, and a DevOps auto-healer for dependency conflicts.
 
-Live demo: https://sentinelops.numaa.workers.dev (build sentinelops-20261104-2221Z at last verification, Nov 4, 2026). No login, no keys, no phone number — open the URL and paste code.
-
+Live demo: https://sentinel-scan-and-seal.lovable.app (build sentinelops-20261104-2221Z at last verification, Nov 4, 2026). No login, no keys, no phone number — open the URL and paste code.
 ## Verified live (Nov 4, 2026, on the published build)
 
 - Vulnerable Python (eval + os.system): REVIEW, risk 24/100, SEC-003 ×2 (CWE-95 eval, CWE-78 os.system), real patches. Re-scan of patched code: CLEAN, 0/100, banner "risk 24/100 → 0/100".

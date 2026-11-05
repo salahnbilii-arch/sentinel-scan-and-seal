@@ -35,7 +35,7 @@ export const Route = createFileRoute("/sentinel")({
 
 const SAMPLE = `import os, requests
 DEBUG = True
-API_KEY = "sk_live_9f2b8c41d77a4e0eb3a5"
+API_KEY = "EXAMPLE_KEY_NOT_REAL_0000"
 
 def get_user(conn, user_id):
     cur = conn.cursor()

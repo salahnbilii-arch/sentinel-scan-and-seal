@@ -16,7 +16,7 @@ afterAll(() => {
   else process.env["SENTINELOPS_AUDIT_SIGNING_KEY"] = prevSigningKey;
 });
 
-const SOURCE = 'API_KEY = "sk_live_9f8e7d6c5b4a3210"\nDEBUG = True';
+const SOURCE = 'API_KEY = "EXAMPLE_KEY_NOT_REAL_0000"\nDEBUG = True';
 
 describe("evidence pack coherence", () => {
   it("bundles one coherent run: matching scanId and artifactId in every file", async () => {
